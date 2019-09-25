@@ -1,0 +1,5 @@
+<div class="key"
+     [ngClass]="{'key--pressed': key.isPressed, 'key--flat': key.note.isFlat()}"
+     (mousedown)="onMouseDown()"
+     (mouseup)="onMouseUp()">
+</div>
