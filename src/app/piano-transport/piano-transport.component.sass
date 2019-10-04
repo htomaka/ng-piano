@@ -1,0 +1,15 @@
+.button
+  background: #DDDDDD
+  &--playing
+    background: #38ff41
+  &--recording
+    background: #ff5e6a
+  &--waiting
+    animation: blink .3s infinite alternate
+
+
+@keyframes blink
+  from
+    background: #DDDDDD
+  to
+    background: #ff5e6a

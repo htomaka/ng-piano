@@ -26,10 +26,6 @@ export class Note {
     return noteName + octave.toString();
   }
 
-  valueOf() {
-    return this.value;
-  }
-
   isFlat() {
     return this.toNote().includes('#');
   }

@@ -1,4 +1,4 @@
-import {Note} from '../../../core/note';
+import {Note} from './note';
 
 export interface Key {
   note: Note;

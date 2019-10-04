@@ -1,5 +1,5 @@
 import {Component, EventEmitter, OnInit, Output} from '@angular/core';
-import {Key} from './piano-key/model/key';
+import {Key} from '../core/key';
 import {Note} from '../core/note';
 
 @Component({
@@ -9,7 +9,8 @@ import {Note} from '../core/note';
 })
 
 export class PianoKeyboardComponent implements OnInit {
-  @Output() trigger = new EventEmitter<Key>();
+  @Output() noteOn = new EventEmitter<Key>();
+  @Output() noteOff = new EventEmitter<Key>();
   public keys: Key[] = [];
 
   constructor() {
@@ -19,8 +20,12 @@ export class PianoKeyboardComponent implements OnInit {
     this.generateKeys();
   }
 
-  public onKeyPressed(key: Key) {
-    this.trigger.emit(key);
+  public handleNoteOn(key: Key) {
+    this.noteOn.emit(key);
+  }
+
+  public handleNoteOff(key: Key) {
+    this.noteOff.emit(key);
   }
 
   generateKeys() {

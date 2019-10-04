@@ -11,6 +11,7 @@ import { PianoKeyComponent } from './piano-keyboard/piano-key/piano-key.componen
 import {InstrumentService} from './core/instrument.service';
 import {BufferService} from './core/buffer.service';
 import {HttpClientModule} from '@angular/common/http';
+import {TickerService} from './core/ticker.service';
 
 @NgModule({
   declarations: [
@@ -26,7 +27,7 @@ import {HttpClientModule} from '@angular/common/http';
     BrowserModule,
     HttpClientModule
   ],
-  providers: [InstrumentService, BufferService],
+  providers: [InstrumentService, BufferService, TickerService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -1,9 +1,11 @@
 import {Injectable} from '@angular/core';
 import {BufferService} from './buffer.service';
-import {catchError, map, mapTo, mergeMap, tap} from 'rxjs/operators';
-import {forkJoin, Observable, throwError} from 'rxjs';
+import {mergeMap, tap} from 'rxjs/operators';
+import {forkJoin, Observable} from 'rxjs';
 import {fromPromise} from 'rxjs/internal-compatibility';
-import {Key} from '../piano-keyboard/piano-key/model/key';
+import {Key} from './key';
+import {Event} from './event';
+import {AudioContextService} from './audio-context.service';
 
 @Injectable({
   providedIn: 'root'
@@ -12,8 +14,8 @@ export class InstrumentService {
   private ctx: AudioContext;
   private buffers: { [key: number]: AudioBuffer } = {};
 
-  constructor(private bufferService: BufferService) {
-    this.ctx = new AudioContext();
+  constructor(private bufferService: BufferService, private audioContextService: AudioContextService) {
+    this.ctx = audioContextService.getContext();
   }
 
   load(soundBank: { [key: number]: string }): Observable<AudioBuffer[]> {
@@ -26,7 +28,7 @@ export class InstrumentService {
     }));
   }
 
-  play(key: Key) {
+  private trigger(key: Key, when = 0) {
     const source = this.ctx.createBufferSource();
     const midi = key.note.toMidi();
     // find the closest note pitch
@@ -36,7 +38,7 @@ export class InstrumentService {
     source.buffer = this.buffers[closestNote];
     source.connect(this.ctx.destination);
     source.playbackRate.value = playbackRate;
-    source.start(0);
+    source.start(when);
   }
 
   private intervalToFrequencyRatio(interval) {
@@ -57,5 +59,13 @@ export class InstrumentService {
       interval++;
     }
     throw new Error('No available buffers for note: ' + midi);
+  }
+
+  public play(key: Key) {
+    this.trigger(key);
+  }
+
+  public playback(event: Event) {
+    this.trigger(event.note, event.startTime);
   }
 }

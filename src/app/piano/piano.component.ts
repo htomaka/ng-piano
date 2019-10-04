@@ -1,6 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import {Key} from '../piano-keyboard/piano-key/model/key';
+import {Component, OnInit} from '@angular/core';
+import {Key} from '../core/key';
 import {InstrumentService} from '../core/instrument.service';
+import {SequencerService, SequencerStates} from '../core/sequencer/sequencer.service';
+import {Event} from '../core/event';
+import {Note} from '../core/note';
 
 @Component({
   selector: 'ht-piano',
@@ -9,7 +12,8 @@ import {InstrumentService} from '../core/instrument.service';
 })
 export class PianoComponent implements OnInit {
 
-  constructor(private instrument: InstrumentService) { }
+  constructor(private instrument: InstrumentService, private sequencer: SequencerService) {
+  }
 
   ngOnInit() {
     this.instrument.load({
@@ -28,10 +32,36 @@ export class PianoComponent implements OnInit {
       96: 'assets/samples/M1piano/M1_Piano_C7.wav',
       102: 'assets/samples/M1piano/M1_Piano_F#7.wav'
     }).subscribe();
+
   }
 
-  play(key: Key) {
+  instrumentPlay(key: Key) {
+    console.log(key);
     this.instrument.play(key);
+
+    if (this.sequencer.getState() === SequencerStates.RECORDING) {
+      this.sequencer.scheduleNote(key);
+    }
+  }
+
+  transportRecord() {
+    this.sequencer.record();
+  }
+
+  instrumentStop(key: Key) {}
+
+  transportStart() {
+    this.sequencer.play((event: Event) => {
+      this.instrument.playback(event);
+    });
+  }
+
+  transportStop() {
+    this.sequencer.stop();
+  }
+
+  keyPlay() {
+    this.instrumentPlay({note: new Note(88), isPressed: true});
   }
 
 }

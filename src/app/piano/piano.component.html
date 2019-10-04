@@ -1,6 +1,6 @@
-<div class="piano">
+<div class="piano" (keypress)="keyPlay()">
   <ht-piano-display></ht-piano-display>
   <ht-piano-controls></ht-piano-controls>
-  <ht-piano-transport></ht-piano-transport>
-  <ht-piano-keyboard (trigger)="play($event)"></ht-piano-keyboard>
+  <ht-piano-transport (transportRecord)="transportRecord()" (transportPlay)="transportStart()" (transportStop)="transportStop()" [state]="sequencer.getState()"></ht-piano-transport>
+  <ht-piano-keyboard (noteOn)="instrumentPlay($event)" (noteOff)="instrumentStop($event)"></ht-piano-keyboard>
 </div>
