@@ -8,8 +8,4 @@ export class Event {
     this.note = note;
     this.startTime = startTime;
   }
-
-  getAbsoluteStartTime(context: number): number {
-    return this.startTime - context;
-  }
 }

@@ -1,6 +1,6 @@
-import {Component, EventEmitter, OnInit, Output} from '@angular/core';
-import {Key} from '../core/key';
-import {Note} from '../core/note';
+import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
+import {Key} from '../core/models/key';
+import {Note} from '../core/models/note';
 
 @Component({
   selector: 'ht-piano-keyboard',
@@ -11,14 +11,12 @@ import {Note} from '../core/note';
 export class PianoKeyboardComponent implements OnInit {
   @Output() noteOn = new EventEmitter<Key>();
   @Output() noteOff = new EventEmitter<Key>();
-  public keys: Key[] = [];
+  @Input() keys: Key[];
 
   constructor() {
   }
 
-  ngOnInit() {
-    this.generateKeys();
-  }
+  ngOnInit() {}
 
   public handleNoteOn(key: Key) {
     this.noteOn.emit(key);
@@ -27,16 +25,4 @@ export class PianoKeyboardComponent implements OnInit {
   public handleNoteOff(key: Key) {
     this.noteOff.emit(key);
   }
-
-  generateKeys() {
-    const low = 24; // C1
-    const high = 101; // C8
-    for (let i = low; i <= high; i++) {
-      this.keys = this.keys.concat({
-        note: new Note(i),
-        isPressed: false
-      });
-    }
-  }
-
 }

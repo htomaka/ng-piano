@@ -3,8 +3,8 @@ import {BufferService} from './buffer.service';
 import {mergeMap, tap} from 'rxjs/operators';
 import {forkJoin, Observable} from 'rxjs';
 import {fromPromise} from 'rxjs/internal-compatibility';
-import {Key} from './key';
-import {Event} from './event';
+import {Key} from './models/key';
+import {Event} from './models/event';
 import {AudioContextService} from './audio-context.service';
 
 @Injectable({

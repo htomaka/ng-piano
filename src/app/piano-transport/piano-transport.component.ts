@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {SequencerStates} from '../core/sequencer/sequencer.service';
+import {SequencerStates} from '../core/sequencer.service';
 
 @Component({
   selector: 'ht-piano-transport',

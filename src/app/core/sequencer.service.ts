@@ -1,9 +1,8 @@
 import {Injectable} from '@angular/core';
-import {AudioContextService} from '../audio-context.service';
-import {Event} from '../event';
-import {Key} from '../key';
-import {TickerService} from '../ticker.service';
-import {Part} from '../part';
+import {AudioContextService} from './audio-context.service';
+import {Event} from './models/event';
+import {Key} from './models/key';
+import {Part} from './models/part';
 
 export enum SequencerStates {
   IDLE,

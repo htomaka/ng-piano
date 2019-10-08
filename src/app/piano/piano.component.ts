@@ -1,9 +1,12 @@
-import {Component, OnInit} from '@angular/core';
-import {Key} from '../core/key';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {Key} from '../core/models/key';
 import {InstrumentService} from '../core/instrument.service';
-import {SequencerService, SequencerStates} from '../core/sequencer/sequencer.service';
-import {Event} from '../core/event';
-import {Note} from '../core/note';
+import {SequencerService, SequencerStates} from '../core/sequencer.service';
+import {Event} from '../core/models/event';
+import {Note} from '../core/models/note';
+import {MidiService} from '../core/midi.service';
+import {KeyboardService} from '../core/keyboard.service';
+import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'ht-piano',
@@ -11,8 +14,16 @@ import {Note} from '../core/note';
   styleUrls: ['./piano.component.sass']
 })
 export class PianoComponent implements OnInit {
+  private subscriptions: Subscription;
+  public keys: Key[];
 
-  constructor(private instrument: InstrumentService, private sequencer: SequencerService) {
+  constructor(
+    private instrument: InstrumentService,
+    private sequencer: SequencerService,
+    private midi: MidiService,
+    private keyboard: KeyboardService,
+    private changeDetector: ChangeDetectorRef
+  ) {
   }
 
   ngOnInit() {
@@ -33,12 +44,35 @@ export class PianoComponent implements OnInit {
       102: 'assets/samples/M1piano/M1_Piano_F#7.wav'
     }).subscribe();
 
+    this.midi.getMidi().subscribe();
+
+    this.midi.midiMessage$.subscribe(event => {
+      if (event.type === 'NOTE_ON') {
+        const key = {
+          note: new Note(event.note),
+          isPressed: true
+        };
+        this.instrumentPlay(key);
+      } else {
+        const key = {
+          note: new Note(event.note),
+          isPressed: false
+        };
+        this.instrumentStop(key);
+      }
+    });
+
+    this.keyboard.build();
+
+    this.keyboard.keys$.subscribe(keys => {
+      this.keys = keys;
+      this.changeDetector.detectChanges();
+    });
   }
 
   instrumentPlay(key: Key) {
-    console.log(key);
     this.instrument.play(key);
-
+    this.keyboard.noteOn(key);
     if (this.sequencer.getState() === SequencerStates.RECORDING) {
       this.sequencer.scheduleNote(key);
     }
@@ -48,7 +82,9 @@ export class PianoComponent implements OnInit {
     this.sequencer.record();
   }
 
-  instrumentStop(key: Key) {}
+  instrumentStop(key: Key) {
+    this.keyboard.noteOff(key);
+  }
 
   transportStart() {
     this.sequencer.play((event: Event) => {
@@ -59,9 +95,4 @@ export class PianoComponent implements OnInit {
   transportStop() {
     this.sequencer.stop();
   }
-
-  keyPlay() {
-    this.instrumentPlay({note: new Note(88), isPressed: true});
-  }
-
 }

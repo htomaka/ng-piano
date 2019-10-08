@@ -4,7 +4,7 @@ import {Injectable} from '@angular/core';
   providedIn: 'root'
 })
 export class AudioContextService {
-  private ctx: AudioContext;
+  private readonly ctx: AudioContext;
 
   constructor() {
     this.ctx = new AudioContext();

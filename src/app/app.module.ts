@@ -1,17 +1,18 @@
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import {BrowserModule} from '@angular/platform-browser';
+import {NgModule} from '@angular/core';
 
-import { AppComponent } from './app.component';
-import { PianoComponent } from './piano/piano.component';
-import { PianoKeyboardComponent } from './piano-keyboard/piano-keyboard.component';
-import { PianoDisplayComponent } from './piano-display/piano-display.component';
-import { PianoControlsComponent } from './piano-controls/piano-controls.component';
-import { PianoTransportComponent } from './piano-transport/piano-transport.component';
-import { PianoKeyComponent } from './piano-keyboard/piano-key/piano-key.component';
+import {AppComponent} from './app.component';
+import {PianoComponent} from './piano/piano.component';
+import {PianoKeyboardComponent} from './piano-keyboard/piano-keyboard.component';
+import {PianoDisplayComponent} from './piano-display/piano-display.component';
+import {PianoControlsComponent} from './piano-controls/piano-controls.component';
+import {PianoTransportComponent} from './piano-transport/piano-transport.component';
+import {PianoKeyComponent} from './piano-keyboard/piano-key/piano-key.component';
 import {InstrumentService} from './core/instrument.service';
 import {BufferService} from './core/buffer.service';
 import {HttpClientModule} from '@angular/common/http';
-import {TickerService} from './core/ticker.service';
+import {MidiService} from './core/midi.service';
+import {KeyboardService} from './core/keyboard.service';
 
 @NgModule({
   declarations: [
@@ -27,7 +28,8 @@ import {TickerService} from './core/ticker.service';
     BrowserModule,
     HttpClientModule
   ],
-  providers: [InstrumentService, BufferService, TickerService],
+  providers: [InstrumentService, BufferService, MidiService, KeyboardService],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+}

@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {Key} from '../../core/key';
+import {Key} from '../../core/models/key';
 
 @Component({
   selector: 'ht-piano-key',
@@ -18,12 +18,10 @@ export class PianoKeyComponent implements OnInit {
   }
 
   handleNoteOn() {
-    this.key.isPressed = true;
     this.noteOn.emit(this.key);
   }
 
   handleNoteOff() {
-    this.key.isPressed = false;
     this.noteOff.emit(this.key);
   }
 }
