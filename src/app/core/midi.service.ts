@@ -5,6 +5,11 @@ import {merge, Observable, Subject, throwError} from 'rxjs';
 import MIDIAccess = WebMidi.MIDIAccess;
 import MIDIMessageEvent = WebMidi.MIDIMessageEvent;
 
+export enum midiCommand {
+  NOTE_ON = 144,
+  NOTE_OFF = 128
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -41,15 +46,15 @@ export class MidiService {
     const velocity = (message.data.length > 2) ? message.data[2] : 0;
 
     switch (command) {
-      case 144: // noteOn
+      case midiCommand.NOTE_ON: // noteOn
         if (velocity > 0) {
-          this.midiNoteOn.next({note, velocity, type: 'NOTE_ON'});
+          this.midiNoteOn.next({note, velocity, type: midiCommand.NOTE_ON});
         } else {
-          this.midiNoteOn.next({note, type: 'NOTE_ON'});
+          this.midiNoteOn.next({note, type: midiCommand.NOTE_ON});
         }
         break;
-      case 128: // noteOff
-        this.midiNoteOff.next({note, type: 'NOTE_OFF'});
+      case midiCommand.NOTE_OFF: // noteOff
+        this.midiNoteOff.next({note, type: midiCommand.NOTE_OFF});
         break;
     }
   }
@@ -58,5 +63,5 @@ export class MidiService {
 interface MidiEvent {
   note: number;
   velocity?: number;
-  type: 'NOTE_ON' | 'NOTE_OFF';
+  type: midiCommand;
 }

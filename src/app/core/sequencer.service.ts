@@ -3,6 +3,8 @@ import {AudioContextService} from './audio-context.service';
 import {Event} from './models/event';
 import {Key} from './models/key';
 import {Part} from './models/part';
+import {Subject} from 'rxjs';
+import {take} from 'rxjs/operators';
 
 export enum SequencerStates {
   IDLE,
@@ -15,16 +17,31 @@ export enum SequencerStates {
   providedIn: 'root'
 })
 export class SequencerService {
-  private activeSong: Part;
+  public activeSong: Part;
   private state: SequencerStates = SequencerStates.IDLE;
   private tempo = 60;
+  private stopSubject = new Subject<Key>();
+  private stop$ = this.stopSubject.asObservable();
 
   constructor(private audioContextService: AudioContextService) {
+
   }
 
-  scheduleNote(key: Key) {
+  noteOn(key: Key) {
     const event = new Event(key, this.audioContextService.getCurrentTime() - this.activeSong.startTime);
-    this.activeSong.add(event);
+    this.scheduleNote(event);
+  }
+
+  noteOff(key: Key) {
+    this.stopSubject.next(key);
+  }
+
+  scheduleNote(event: Event) {
+    // schedule note on note off event in order to get note duration
+    this.stop$.pipe(take(1)).subscribe(() => {
+      event.stopTime = this.audioContextService.getCurrentTime() - this.activeSong.startTime;
+      this.activeSong.add(event);
+    });
   }
 
   record() {

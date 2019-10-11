@@ -4,9 +4,10 @@ import {InstrumentService} from '../core/instrument.service';
 import {SequencerService, SequencerStates} from '../core/sequencer.service';
 import {Event} from '../core/models/event';
 import {Note} from '../core/models/note';
-import {MidiService} from '../core/midi.service';
+import {midiCommand, MidiService} from '../core/midi.service';
 import {KeyboardService} from '../core/keyboard.service';
 import {Subscription} from 'rxjs';
+import {AudioContextService} from '../core/audio-context.service';
 
 @Component({
   selector: 'ht-piano',
@@ -14,7 +15,6 @@ import {Subscription} from 'rxjs';
   styleUrls: ['./piano.component.sass']
 })
 export class PianoComponent implements OnInit {
-  private subscriptions: Subscription;
   public keys: Key[];
 
   constructor(
@@ -22,7 +22,7 @@ export class PianoComponent implements OnInit {
     private sequencer: SequencerService,
     private midi: MidiService,
     private keyboard: KeyboardService,
-    private changeDetector: ChangeDetectorRef
+    private changeDetector: ChangeDetectorRef,
   ) {
   }
 
@@ -47,7 +47,7 @@ export class PianoComponent implements OnInit {
     this.midi.getMidi().subscribe();
 
     this.midi.midiMessage$.subscribe(event => {
-      if (event.type === 'NOTE_ON') {
+      if (event.type === midiCommand.NOTE_ON) {
         const key = {
           note: new Note(event.note),
           isPressed: true
@@ -74,7 +74,7 @@ export class PianoComponent implements OnInit {
     this.instrument.play(key);
     this.keyboard.noteOn(key);
     if (this.sequencer.getState() === SequencerStates.RECORDING) {
-      this.sequencer.scheduleNote(key);
+      this.sequencer.noteOn(key);
     }
   }
 
@@ -84,6 +84,9 @@ export class PianoComponent implements OnInit {
 
   instrumentStop(key: Key) {
     this.keyboard.noteOff(key);
+    if (this.sequencer.getState() === SequencerStates.RECORDING) {
+      this.sequencer.noteOff(key);
+    }
   }
 
   transportStart() {
