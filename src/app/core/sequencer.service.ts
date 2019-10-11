@@ -54,10 +54,8 @@ export class SequencerService {
       this.setState(SequencerStates.RECORDING);
     } else {
       this.setState(SequencerStates.PLAYING);
-      const now = this.audioContextService.getCurrentTime();
-      const secondsPerBeat = 60.0 / this.tempo;
       this.activeSong.forEachNote(note => {
-        fn({note: note.note, startTime: now + note.startTime * secondsPerBeat});
+        fn(note);
       });
     }
   }

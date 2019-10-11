@@ -23,6 +23,7 @@ export class PianoComponent implements OnInit {
     private midi: MidiService,
     private keyboard: KeyboardService,
     private changeDetector: ChangeDetectorRef,
+    private audio: AudioContextService
   ) {
   }
 
@@ -91,7 +92,18 @@ export class PianoComponent implements OnInit {
 
   transportStart() {
     this.sequencer.play((event: Event) => {
-      this.instrument.playback(event);
+      const now = this.audio.getCurrentTime();
+      const secondsPerBeat = 60.0 / 60;
+      const newEvent = new Event(event.note, now + event.startTime * secondsPerBeat);
+      newEvent.stopTime = now + event.stopTime * secondsPerBeat;
+      this.instrument.playback(newEvent);
+      setTimeout(() => {
+        this.keyboard.noteOn(event.note);
+      }, event.startTime * 1000);
+
+      setTimeout(() => {
+        this.keyboard.noteOff(event.note);
+      }, event.stopTime * 1000);
     });
   }
 
