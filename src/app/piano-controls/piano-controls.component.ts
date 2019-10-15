@@ -1,4 +1,5 @@
-import {Component, EventEmitter, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {DisplayControl} from '../core/models/displayControl';
 
 @Component({
   selector: 'ht-piano-controls',
@@ -6,24 +7,11 @@ import {Component, EventEmitter, OnInit, Output} from '@angular/core';
   styleUrls: ['./piano-controls.component.sass']
 })
 export class PianoControlsComponent implements OnInit {
-  @Output() play = new EventEmitter();
-  @Output() record = new EventEmitter();
-  @Output() stop = new EventEmitter();
+  @Input() controls: DisplayControl[];
 
   constructor() { }
 
   ngOnInit() {
   }
 
-  handlePlay(): void {
-    this.play.emit();
-  }
-
-  handleStop(): void {
-    this.stop.emit();
-  }
-
-  handleRecord(): void {
-    this.record.emit();
-  }
 }

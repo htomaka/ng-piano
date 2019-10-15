@@ -1,1 +1,5 @@
-<p>Display</p>
+<div class="piano-display">
+  <div class="piano-display-line" *ngFor="let line of lines">{{line}}</div>
+  <span class="piano-display-line inverted" *ngFor="let control of controls">{{control.label}}</span>
+</div>
+<ng-content></ng-content>

@@ -1,6 +1,7 @@
 import {Event} from './event';
 
-export class Part {
+export class Track {
+  public title = 'New song';
   public startTime: number;
   private notes: Event[] = [];
 

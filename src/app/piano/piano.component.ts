@@ -6,8 +6,18 @@ import {Event} from '../core/models/event';
 import {Note} from '../core/models/note';
 import {midiCommand, MidiService} from '../core/midi.service';
 import {KeyboardService} from '../core/keyboard.service';
-import {Subscription} from 'rxjs';
 import {AudioContextService} from '../core/audio-context.service';
+import {LibraryService} from '../core/library.service';
+import {switchMap, take, tap} from 'rxjs/operators';
+import {Track} from '../core/models/track';
+import {Subject} from 'rxjs';
+import {DisplayControl} from '../core/models/displayControl';
+import {LoadingSongCommands} from '../shared/controls/loadingSongCommands';
+import {SavingSongCommands} from '../shared/controls/savingSongCommands';
+import {IdleCommands} from '../shared/controls/idleCommands';
+import {RecordingSongCommands} from '../shared/controls/recordingSongCommands';
+import {RecordingArmedCommands} from '../shared/controls/recordingArmedCommands';
+import {PlayingSongsCommands} from '../shared/controls/playingSongsCommands';
 
 @Component({
   selector: 'ht-piano',
@@ -15,7 +25,12 @@ import {AudioContextService} from '../core/audio-context.service';
   styleUrls: ['./piano.component.sass']
 })
 export class PianoComponent implements OnInit {
+  private displaySubject = new Subject<string[]>();
+  private controlsSubject = new Subject<DisplayControl[]>();
   public keys: Key[];
+  public tracks: Track[];
+  public display$ = this.displaySubject.asObservable();
+  public controls$ = this.controlsSubject.asObservable();
 
   constructor(
     private instrument: InstrumentService,
@@ -23,27 +38,15 @@ export class PianoComponent implements OnInit {
     private midi: MidiService,
     private keyboard: KeyboardService,
     private changeDetector: ChangeDetectorRef,
-    private audio: AudioContextService
+    private audio: AudioContextService,
+    private library: LibraryService
   ) {
   }
 
   ngOnInit() {
-    this.instrument.load({
-      24: 'assets/samples/M1piano/M1_Piano_C1.wav',
-      30: 'assets/samples/M1piano/M1_Piano_F#1.wav',
-      36: 'assets/samples/M1piano/M1_Piano_C2.wav',
-      42: 'assets/samples/M1piano/M1_Piano_F#2.wav',
-      48: 'assets/samples/M1piano/M1_Piano_C3.wav',
-      54: 'assets/samples/M1piano/M1_Piano_F#3.wav',
-      60: 'assets/samples/M1piano/M1_Piano_C4.wav',
-      66: 'assets/samples/M1piano/M1_Piano_F#4.wav',
-      72: 'assets/samples/M1piano/M1_Piano_C5.wav',
-      78: 'assets/samples/M1piano/M1_Piano_F#5.wav',
-      84: 'assets/samples/M1piano/M1_Piano_C6.wav',
-      90: 'assets/samples/M1piano/M1_Piano_F#6.wav',
-      96: 'assets/samples/M1piano/M1_Piano_C7.wav',
-      102: 'assets/samples/M1piano/M1_Piano_F#7.wav'
-    }).subscribe();
+    this.library.loadBank('m1_piano').pipe(
+      switchMap(soundBank => this.instrument.load(soundBank))
+    ).subscribe();
 
     this.midi.getMidi().subscribe();
 
@@ -68,6 +71,13 @@ export class PianoComponent implements OnInit {
     this.keyboard.keys$.subscribe(keys => {
       this.keys = keys;
       this.changeDetector.detectChanges();
+    });
+
+    this.getDisplay();
+    this.getCommands();
+    this.sequencer.state$.subscribe(() => {
+      this.getDisplay();
+      this.getCommands();
     });
   }
 
@@ -109,5 +119,104 @@ export class PianoComponent implements OnInit {
 
   transportStop() {
     this.sequencer.stop();
+  }
+
+  getDisplay() {
+    let nextDisplay = [];
+    switch (this.sequencer.getState()) {
+      case SequencerStates.PLAYING:
+        nextDisplay = [
+          'Playing...',
+          this.sequencer.activeTrack ? this.sequencer.activeTrack.title : 'No song'
+        ];
+        break;
+      case SequencerStates.RECORDING_ARMED:
+        nextDisplay = [
+          'Recording armed...',
+          'Be ready!'
+        ];
+        break;
+      case SequencerStates.RECORDING:
+        nextDisplay = [
+          'Recording...',
+          this.sequencer.activeTrack.title
+        ];
+        break;
+      case SequencerStates.SAVING:
+        nextDisplay = [
+          'Save song?',
+          this.sequencer.activeTrack.title
+        ];
+        break;
+      case SequencerStates.LOADING:
+        nextDisplay = [
+          'Load song?',
+          (this.tracks && this.tracks.map(t => t.title).join(', ')) || 'No songs recorded'
+        ];
+        break;
+      default:
+        nextDisplay = [
+          'M1 Piano',
+          this.sequencer.activeTrack ? this.sequencer.activeTrack.title : 'No song'
+        ];
+    }
+
+    this.displaySubject.next(nextDisplay);
+  }
+
+  getCommands() {
+    let nextControls = [];
+    switch (this.sequencer.getState()) {
+      case SequencerStates.PLAYING:
+        nextControls = new PlayingSongsCommands().get(this);
+        break;
+      case SequencerStates.RECORDING_ARMED:
+        nextControls = new RecordingArmedCommands().get(this);
+        break;
+      case SequencerStates.RECORDING:
+        nextControls = new RecordingSongCommands().get(this);
+        break;
+      case SequencerStates.SAVING:
+        nextControls = new SavingSongCommands().get(this);
+        break;
+      case SequencerStates.LOADING:
+        nextControls = new LoadingSongCommands().get(this);
+        break;
+      default:
+        nextControls = new IdleCommands().get(this);
+    }
+
+    this.controlsSubject.next(nextControls);
+  }
+
+  onCancel() {
+    this.sequencer.cancel();
+  }
+
+  onSave() {
+    this.sequencer.save();
+  }
+
+  onLoad() {
+    this.sequencer.load();
+    this.sequencer.load$
+      .pipe(
+        take(1),
+        switchMap(() => {
+          return this.library.loadTracks();
+        }),
+      )
+      .subscribe((tracks: Track[]) => {
+        this.tracks = tracks;
+        this.getDisplay();
+      });
+  }
+
+  onConfirm(): void {
+    this.sequencer.confirm('my song');
+    this.sequencer.save$.pipe(
+      take(1),
+      switchMap((track: Track) => this.library.saveTrack(track))
+    ).subscribe();
   }
 }

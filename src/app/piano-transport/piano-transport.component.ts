@@ -35,7 +35,7 @@ export class PianoTransportComponent implements OnInit {
   }
 
   isWaiting(): boolean {
-    return this.state === SequencerStates.WAITING;
+    return this.state === SequencerStates.RECORDING_ARMED;
   }
 
   isPlaying() {

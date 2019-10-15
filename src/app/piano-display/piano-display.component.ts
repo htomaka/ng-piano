@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
+import {DisplayControl} from '../core/models/displayControl';
 
 @Component({
   selector: 'ht-piano-display',
@@ -6,6 +7,8 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./piano-display.component.sass']
 })
 export class PianoDisplayComponent implements OnInit {
+  @Input() lines: string[];
+  @Input() controls: DisplayControl[];
 
   constructor() { }
 

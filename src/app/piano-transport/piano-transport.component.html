@@ -1,4 +1,4 @@
-<div class="piano-controls">
+<div class="piano-transport">
   <button (click)="handlePlay()" [ngClass]="{'button--playing': isPlaying()}">Play</button>
   <button (click)="handleStop()">Stop</button>
   <button (click)="handleRecord()" [ngClass]="{'button--recording': isRecording(), 'button--waiting': isWaiting()}">Record</button>
