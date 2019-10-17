@@ -1,19 +1,19 @@
 import {Commands} from './commands';
-import {DisplayControl} from '../../core/models/displayControl';
+import {Command} from '../../core/models/command';
 
 export class IdleCommands extends Commands {
-  get(context: any): DisplayControl[] {
+  get(context: any): Command[] {
     return [
       {
         label: 'load songs',
-        command: () => context.onLoad()
+        exec: () => context.onLoad()
       },
       {
         label: 'load sounds',
-        command: () => console.log('load instrument')
+        exec: () => console.log('load instrument')
       },
-      {} as DisplayControl,
-      {} as DisplayControl
+      {} as Command,
+      {} as Command
     ];
   }
 

@@ -1,24 +1,24 @@
 import {Commands} from './commands';
-import {DisplayControl} from '../../core/models/displayControl';
+import {Command} from '../../core/models/command';
 
 export class LoadingSongCommands extends Commands {
-  get(context: any): DisplayControl[] {
+  get(context: any): Command[] {
     return [
       {
         label: 'prev',
-        command: () => context.onLoad()
+        exec: () => context.onLoad()
       },
       {
         label: 'next',
-        command: () => console.log('next')
+        exec: () => console.log('next')
       },
       {
         label: 'cancel',
-        command: () => context.onCancel()
+        exec: () => context.onCancel()
       },
       {
         label: 'confirm',
-        command: () => console.log('confirm load song')
+        exec: () => console.log('confirm load song')
       },
     ];
   }

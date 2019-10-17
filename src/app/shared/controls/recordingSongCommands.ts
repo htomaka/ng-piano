@@ -1,8 +1,8 @@
 import {Commands} from './commands';
-import {DisplayControl} from '../../core/models/displayControl';
+import {Command} from '../../core/models/command';
 
 export class RecordingSongCommands extends Commands {
-  get(context: any): DisplayControl[] {
+  get(context: any): Command[] {
     return [];
   }
 }

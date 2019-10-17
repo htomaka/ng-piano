@@ -11,13 +11,19 @@ import {LibraryService} from '../core/library.service';
 import {switchMap, take, tap} from 'rxjs/operators';
 import {Track} from '../core/models/track';
 import {Subject} from 'rxjs';
-import {DisplayControl} from '../core/models/displayControl';
+import {Command} from '../core/models/command';
 import {LoadingSongCommands} from '../shared/controls/loadingSongCommands';
 import {SavingSongCommands} from '../shared/controls/savingSongCommands';
 import {IdleCommands} from '../shared/controls/idleCommands';
 import {RecordingSongCommands} from '../shared/controls/recordingSongCommands';
 import {RecordingArmedCommands} from '../shared/controls/recordingArmedCommands';
 import {PlayingSongsCommands} from '../shared/controls/playingSongsCommands';
+import {LoadingSongDisplay} from '../shared/displays/loadingSongDisplay';
+import {IdleDisplay} from '../shared/displays/idleDisplay';
+import {SavingSongDisplay} from '../shared/displays/savingSongDisplay';
+import {RecordingSongDisplay} from '../shared/displays/recordingSongDisplay';
+import {RecordingArmedDisplay} from '../shared/displays/recordingArmedDisplay';
+import {PlayingSongDisplay} from '../shared/displays/playingSongDisplay';
 
 @Component({
   selector: 'ht-piano',
@@ -26,7 +32,7 @@ import {PlayingSongsCommands} from '../shared/controls/playingSongsCommands';
 })
 export class PianoComponent implements OnInit {
   private displaySubject = new Subject<string[]>();
-  private controlsSubject = new Subject<DisplayControl[]>();
+  private controlsSubject = new Subject<Command[]>();
   public keys: Key[];
   public tracks: Track[];
   public display$ = this.displaySubject.asObservable();
@@ -125,40 +131,22 @@ export class PianoComponent implements OnInit {
     let nextDisplay = [];
     switch (this.sequencer.getState()) {
       case SequencerStates.PLAYING:
-        nextDisplay = [
-          'Playing...',
-          this.sequencer.activeTrack ? this.sequencer.activeTrack.title : 'No song'
-        ];
+        nextDisplay = new PlayingSongDisplay().render(this);
         break;
       case SequencerStates.RECORDING_ARMED:
-        nextDisplay = [
-          'Recording armed...',
-          'Be ready!'
-        ];
+        nextDisplay = new RecordingArmedDisplay().render(this);
         break;
       case SequencerStates.RECORDING:
-        nextDisplay = [
-          'Recording...',
-          this.sequencer.activeTrack.title
-        ];
+        nextDisplay = new RecordingSongDisplay().render(this);
         break;
       case SequencerStates.SAVING:
-        nextDisplay = [
-          'Save song?',
-          this.sequencer.activeTrack.title
-        ];
+        nextDisplay = new SavingSongDisplay().render(this);
         break;
       case SequencerStates.LOADING:
-        nextDisplay = [
-          'Load song?',
-          (this.tracks && this.tracks.map(t => t.title).join(', ')) || 'No songs recorded'
-        ];
+        nextDisplay = new LoadingSongDisplay().render(this);
         break;
       default:
-        nextDisplay = [
-          'M1 Piano',
-          this.sequencer.activeTrack ? this.sequencer.activeTrack.title : 'No song'
-        ];
+        nextDisplay = new IdleDisplay().render(this);
     }
 
     this.displaySubject.next(nextDisplay);
@@ -208,7 +196,6 @@ export class PianoComponent implements OnInit {
       )
       .subscribe((tracks: Track[]) => {
         this.tracks = tracks;
-        this.getDisplay();
       });
   }
 

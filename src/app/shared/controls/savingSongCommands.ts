@@ -1,19 +1,19 @@
 import {Commands} from './commands';
-import {DisplayControl} from '../../core/models/displayControl';
+import {Command} from '../../core/models/command';
 
 export class SavingSongCommands extends Commands {
-  get(context: any): DisplayControl[] {
+  get(context: any): Command[] {
     return [
       {
         label: 'cancel',
-        command: () => context.onCancel()
+        exec: () => context.onCancel()
       },
       {
         label: 'confirm',
-        command: () => context.onConfirm()
+        exec: () => context.onConfirm()
       },
-      {} as DisplayControl,
-      {} as DisplayControl
+      {} as Command,
+      {} as Command
     ];
   }
 

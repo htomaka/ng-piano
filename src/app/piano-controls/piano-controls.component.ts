@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {DisplayControl} from '../core/models/displayControl';
+import {Command} from '../core/models/command';
 
 @Component({
   selector: 'ht-piano-controls',
@@ -7,7 +7,7 @@ import {DisplayControl} from '../core/models/displayControl';
   styleUrls: ['./piano-controls.component.sass']
 })
 export class PianoControlsComponent implements OnInit {
-  @Input() controls: DisplayControl[];
+  @Input() controls: Command[];
 
   constructor() { }
 

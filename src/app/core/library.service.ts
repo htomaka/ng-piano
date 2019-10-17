@@ -7,7 +7,7 @@ import {startWith} from 'rxjs/operators';
   providedIn: 'root'
 })
 export class LibraryService {
-  private tracks: Track[] = [];
+  public tracks: Track[] = [];
 
   constructor() {
   }
