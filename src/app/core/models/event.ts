@@ -1,4 +1,4 @@
-import {Key} from './key';
+import { Key } from './key';
 
 export class Event {
   note: Key;

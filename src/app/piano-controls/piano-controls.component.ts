@@ -1,5 +1,5 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {Command} from '../core/models/command';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Command } from '../core/models/command';
 
 @Component({
   selector: 'ht-piano-controls',
@@ -9,9 +9,7 @@ import {Command} from '../core/models/command';
 export class PianoControlsComponent implements OnInit {
   @Input() controls: Command[];
 
-  constructor() { }
+  constructor() {}
 
-  ngOnInit() {
-  }
-
+  ngOnInit() {}
 }

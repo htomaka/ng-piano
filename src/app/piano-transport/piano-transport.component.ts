@@ -1,5 +1,5 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {SequencerStates} from '../core/sequencer.service';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import {AppStates} from '../core/models/states';
 
 @Component({
   selector: 'ht-piano-transport',
@@ -7,16 +7,14 @@ import {SequencerStates} from '../core/sequencer.service';
   styleUrls: ['./piano-transport.component.sass']
 })
 export class PianoTransportComponent implements OnInit {
-  @Input() state: SequencerStates;
+  @Input() state: AppStates;
   @Output() transportPlay = new EventEmitter();
   @Output() transportRecord = new EventEmitter();
   @Output() transportStop = new EventEmitter();
 
-  constructor() {
-  }
+  constructor() {}
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   handlePlay(): void {
     this.transportPlay.emit();
@@ -31,14 +29,17 @@ export class PianoTransportComponent implements OnInit {
   }
 
   isRecording(): boolean {
-    return this.state === SequencerStates.RECORDING;
+    return this.state === AppStates.SEQUENCER_RECORDING;
   }
 
   isWaiting(): boolean {
-    return this.state === SequencerStates.RECORDING_ARMED;
+    return this.state === AppStates.SEQUENCER_RECORDING_ARMED;
   }
 
   isPlaying() {
-    return this.state === SequencerStates.PLAYING || this.state === SequencerStates.RECORDING;
+    return (
+      this.state === AppStates.SEQUENCER_PLAYING ||
+      this.state === AppStates.SEQUENCER_RECORDING
+    );
   }
 }

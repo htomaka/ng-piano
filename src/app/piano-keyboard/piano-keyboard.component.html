@@ -1,3 +1,9 @@
 <div class="keyboard">
-  <ht-piano-key [key]="key" *ngFor="let key of keys; let i = index" [index]="i" (noteOn)="handleNoteOn($event)" (noteOff)="handleNoteOff($event)"></ht-piano-key>
+  <ht-piano-key
+    [key]="key"
+    *ngFor="let key of keys; let i = index"
+    [index]="i"
+    (noteOn)="handleNoteOn($event)"
+    (noteOff)="handleNoteOff($event)"
+  ></ht-piano-key>
 </div>

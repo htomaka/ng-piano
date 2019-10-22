@@ -1,16 +1,18 @@
-import {Injectable} from '@angular/core';
-import {Observable, of} from 'rxjs';
-import {Track} from './models/track';
-import {startWith} from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { Observable, of, ReplaySubject, Subject, throwError } from 'rxjs';
+import { Track } from './models/track';
+import { startWith } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class LibraryService {
+  private activeTrackSubject = new ReplaySubject<Track>(1);
+  private activeTrackIndex = 0;
   public tracks: Track[] = [];
+  public activeTrack$ = this.activeTrackSubject.asObservable().pipe(startWith(this.loadTrackPreview()));
 
-  constructor() {
-  }
+  constructor() {}
 
   loadBank(soundBank: string): Observable<{ [key: string]: string }> {
     return of({
@@ -37,7 +39,39 @@ export class LibraryService {
   }
 
   loadTracks(): Observable<Track[]> {
-    return of(this.tracks)
-      .pipe(startWith([]));
+    return of(this.tracks).pipe(startWith([]));
+  }
+
+  loadTrack(): Observable<Track> {
+    return this.activeTrackIndex > -1
+      ? of(this.loadTrackPreview())
+      : throwError(`song not found`);
+  }
+
+  nextTrack() {
+    if (!this.tracks.length) {
+      return;
+    }
+    this.activeTrackIndex = ++this.activeTrackIndex % this.tracks.length;
+    this.activeTrackSubject.next(this.tracks[this.activeTrackIndex]);
+  }
+
+  prevTrack() {
+    if (!this.tracks.length) {
+      return;
+    }
+    if (this.activeTrackIndex > 0) {
+      this.activeTrackIndex = --this.activeTrackIndex % (this.tracks.length - 1);
+    } else {
+      this.activeTrackIndex = this.tracks.length - 1;
+    }
+    this.activeTrackSubject.next(this.tracks[this.activeTrackIndex]);
+  }
+
+  loadTrackPreview(): Track {
+    if (!this.tracks.length) {
+      return;
+    }
+    return this.tracks[this.activeTrackIndex];
   }
 }

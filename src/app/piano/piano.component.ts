@@ -1,29 +1,17 @@
-import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
-import {Key} from '../core/models/key';
-import {InstrumentService} from '../core/instrument.service';
-import {SequencerService, SequencerStates} from '../core/sequencer.service';
-import {Event} from '../core/models/event';
-import {Note} from '../core/models/note';
-import {midiCommand, MidiService} from '../core/midi.service';
-import {KeyboardService} from '../core/keyboard.service';
-import {AudioContextService} from '../core/audio-context.service';
-import {LibraryService} from '../core/library.service';
-import {switchMap, take, tap} from 'rxjs/operators';
-import {Track} from '../core/models/track';
-import {Subject} from 'rxjs';
-import {Command} from '../core/models/command';
-import {LoadingSongCommands} from '../shared/controls/loadingSongCommands';
-import {SavingSongCommands} from '../shared/controls/savingSongCommands';
-import {IdleCommands} from '../shared/controls/idleCommands';
-import {RecordingSongCommands} from '../shared/controls/recordingSongCommands';
-import {RecordingArmedCommands} from '../shared/controls/recordingArmedCommands';
-import {PlayingSongsCommands} from '../shared/controls/playingSongsCommands';
-import {LoadingSongDisplay} from '../shared/displays/loadingSongDisplay';
-import {IdleDisplay} from '../shared/displays/idleDisplay';
-import {SavingSongDisplay} from '../shared/displays/savingSongDisplay';
-import {RecordingSongDisplay} from '../shared/displays/recordingSongDisplay';
-import {RecordingArmedDisplay} from '../shared/displays/recordingArmedDisplay';
-import {PlayingSongDisplay} from '../shared/displays/playingSongDisplay';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Key } from '../core/models/key';
+import { InstrumentService } from '../core/instrument.service';
+import { SequencerService } from '../core/sequencer.service';
+import { Event } from '../core/models/event';
+import { Note } from '../core/models/note';
+import { midiCommand, MidiService } from '../core/midi.service';
+import { KeyboardService } from '../core/keyboard.service';
+import { AudioContextService } from '../core/audio-context.service';
+import { LibraryService } from '../core/library.service';
+import { switchMap, take } from 'rxjs/operators';
+import { Track } from '../core/models/track';
+import { CommandsService } from '../shared/commands/commands.service';
+import {AppStates} from '../core/models/states';
 
 @Component({
   selector: 'ht-piano',
@@ -31,12 +19,10 @@ import {PlayingSongDisplay} from '../shared/displays/playingSongDisplay';
   styleUrls: ['./piano.component.sass']
 })
 export class PianoComponent implements OnInit {
-  private displaySubject = new Subject<string[]>();
-  private controlsSubject = new Subject<Command[]>();
   public keys: Key[];
   public tracks: Track[];
-  public display$ = this.displaySubject.asObservable();
-  public controls$ = this.controlsSubject.asObservable();
+  public commands$ = this.commands.commands$;
+  public state$ = this.sequencer.state$;
 
   constructor(
     private instrument: InstrumentService,
@@ -45,14 +31,15 @@ export class PianoComponent implements OnInit {
     private keyboard: KeyboardService,
     private changeDetector: ChangeDetectorRef,
     private audio: AudioContextService,
-    private library: LibraryService
-  ) {
-  }
+    private library: LibraryService,
+    private commands: CommandsService
+  ) {}
 
   ngOnInit() {
-    this.library.loadBank('m1_piano').pipe(
-      switchMap(soundBank => this.instrument.load(soundBank))
-    ).subscribe();
+    this.library
+      .loadBank('m1_piano')
+      .pipe(switchMap(soundBank => this.instrument.load(soundBank)))
+      .subscribe();
 
     this.midi.getMidi().subscribe();
 
@@ -79,18 +66,17 @@ export class PianoComponent implements OnInit {
       this.changeDetector.detectChanges();
     });
 
-    this.getDisplay();
-    this.getCommands();
-    this.sequencer.state$.subscribe(() => {
-      this.getDisplay();
-      this.getCommands();
+    this.commands.get(this, this.sequencer.getState());
+
+    this.sequencer.state$.subscribe((state: AppStates) => {
+      this.commands.get(this, state);
     });
   }
 
   instrumentPlay(key: Key) {
     this.instrument.play(key);
     this.keyboard.noteOn(key);
-    if (this.sequencer.getState() === SequencerStates.RECORDING) {
+    if (this.sequencer.getState() === AppStates.SEQUENCER_RECORDING) {
       this.sequencer.noteOn(key);
     }
   }
@@ -101,7 +87,7 @@ export class PianoComponent implements OnInit {
 
   instrumentStop(key: Key) {
     this.keyboard.noteOff(key);
-    if (this.sequencer.getState() === SequencerStates.RECORDING) {
+    if (this.sequencer.getState() === AppStates.SEQUENCER_RECORDING) {
       this.sequencer.noteOff(key);
     }
   }
@@ -110,7 +96,10 @@ export class PianoComponent implements OnInit {
     this.sequencer.play((event: Event) => {
       const now = this.audio.getCurrentTime();
       const secondsPerBeat = 60.0 / 60;
-      const newEvent = new Event(event.note, now + event.startTime * secondsPerBeat);
+      const newEvent = new Event(
+        event.note,
+        now + event.startTime * secondsPerBeat
+      );
       newEvent.stopTime = now + event.stopTime * secondsPerBeat;
       this.instrument.playback(newEvent);
       setTimeout(() => {
@@ -127,62 +116,8 @@ export class PianoComponent implements OnInit {
     this.sequencer.stop();
   }
 
-  getDisplay() {
-    let nextDisplay = [];
-    switch (this.sequencer.getState()) {
-      case SequencerStates.PLAYING:
-        nextDisplay = new PlayingSongDisplay().render(this);
-        break;
-      case SequencerStates.RECORDING_ARMED:
-        nextDisplay = new RecordingArmedDisplay().render(this);
-        break;
-      case SequencerStates.RECORDING:
-        nextDisplay = new RecordingSongDisplay().render(this);
-        break;
-      case SequencerStates.SAVING:
-        nextDisplay = new SavingSongDisplay().render(this);
-        break;
-      case SequencerStates.LOADING:
-        nextDisplay = new LoadingSongDisplay().render(this);
-        break;
-      default:
-        nextDisplay = new IdleDisplay().render(this);
-    }
-
-    this.displaySubject.next(nextDisplay);
-  }
-
-  getCommands() {
-    let nextControls = [];
-    switch (this.sequencer.getState()) {
-      case SequencerStates.PLAYING:
-        nextControls = new PlayingSongsCommands().get(this);
-        break;
-      case SequencerStates.RECORDING_ARMED:
-        nextControls = new RecordingArmedCommands().get(this);
-        break;
-      case SequencerStates.RECORDING:
-        nextControls = new RecordingSongCommands().get(this);
-        break;
-      case SequencerStates.SAVING:
-        nextControls = new SavingSongCommands().get(this);
-        break;
-      case SequencerStates.LOADING:
-        nextControls = new LoadingSongCommands().get(this);
-        break;
-      default:
-        nextControls = new IdleCommands().get(this);
-    }
-
-    this.controlsSubject.next(nextControls);
-  }
-
   onCancel() {
     this.sequencer.cancel();
-  }
-
-  onSave() {
-    this.sequencer.save();
   }
 
   onLoad() {
@@ -192,18 +127,37 @@ export class PianoComponent implements OnInit {
         take(1),
         switchMap(() => {
           return this.library.loadTracks();
-        }),
+        })
       )
       .subscribe((tracks: Track[]) => {
         this.tracks = tracks;
       });
   }
 
-  onConfirm(): void {
-    this.sequencer.confirm('my song');
-    this.sequencer.save$.pipe(
-      take(1),
-      switchMap((track: Track) => this.library.saveTrack(track))
-    ).subscribe();
+  loadNextSong() {
+    this.library.nextTrack();
+  }
+
+  loadPrevSong() {
+    this.library.prevTrack();
+  }
+
+  saveSong(): void {
+    this.sequencer.confirmSaveSong();
+    this.sequencer.save$
+      .pipe(
+        take(1),
+        switchMap((track: Track) => this.library.saveTrack(track))
+      )
+      .subscribe();
+  }
+
+  loadSong() {
+    return this.library
+      .loadTrack()
+      .pipe(take(1))
+      .subscribe((song: Track) => {
+        this.sequencer.confirmLoadSong(song);
+      });
   }
 }

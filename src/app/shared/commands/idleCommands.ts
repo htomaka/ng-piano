@@ -1,7 +1,7 @@
-import {Commands} from './commands';
-import {Command} from '../../core/models/command';
+import { Commands } from './commands';
+import { Command } from '../../core/models/command';
 
-export class IdleCommands extends Commands {
+export class IdleCommands implements Commands {
   get(context: any): Command[] {
     return [
       {
@@ -16,5 +16,4 @@ export class IdleCommands extends Commands {
       {} as Command
     ];
   }
-
 }

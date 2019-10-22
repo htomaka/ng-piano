@@ -1,7 +1,7 @@
-import {Injectable} from '@angular/core';
-import {Key} from './models/key';
-import {ReplaySubject} from 'rxjs';
-import {Note} from './models/note';
+import { Injectable } from '@angular/core';
+import { Key } from './models/key';
+import { ReplaySubject } from 'rxjs';
+import { Note } from './models/note';
 
 @Injectable({
   providedIn: 'root'

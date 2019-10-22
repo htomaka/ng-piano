@@ -1,9 +1,9 @@
-import {Event} from './event';
+import { Event } from './event';
 
 export class Track {
   public title = 'New song';
   public startTime: number;
-  private notes: Event[] = [];
+  public notes: Event[] = [];
 
   constructor(startTime: number) {
     this.startTime = startTime;
@@ -19,5 +19,9 @@ export class Track {
 
   forEachNote(fn: (note: Event) => void) {
     this.getNotes().forEach(fn);
+  }
+
+  setTitle(title: string) {
+    this.title = title;
   }
 }

@@ -1,5 +1,6 @@
-<div class="key"
-     [ngClass]="{'key--pressed': key.isPressed, 'key--flat': key.note.isFlat()}"
-     (mousedown)="handleNoteOn()"
-     (mouseup)="handleNoteOff()">
-</div>
+<div
+  class="key"
+  [ngClass]="{ 'key--pressed': key.isPressed, 'key--flat': key.note.isFlat() }"
+  (mousedown)="handleNoteOn()"
+  (mouseup)="handleNoteOff()"
+></div>

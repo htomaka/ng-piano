@@ -1,11 +1,11 @@
-import {Injectable} from '@angular/core';
-import {BufferService} from './buffer.service';
-import {mergeMap, tap} from 'rxjs/operators';
-import {forkJoin, Observable} from 'rxjs';
-import {fromPromise} from 'rxjs/internal-compatibility';
-import {Key} from './models/key';
-import {Event} from './models/event';
-import {AudioContextService} from './audio-context.service';
+import { Injectable } from '@angular/core';
+import { BufferService } from './buffer.service';
+import { mergeMap, tap } from 'rxjs/operators';
+import { forkJoin, Observable } from 'rxjs';
+import { fromPromise } from 'rxjs/internal-compatibility';
+import { Key } from './models/key';
+import { Event } from './models/event';
+import { AudioContextService } from './audio-context.service';
 
 @Injectable({
   providedIn: 'root'
@@ -14,18 +14,26 @@ export class InstrumentService {
   private ctx: AudioContext;
   private buffers: { [key: number]: AudioBuffer } = {};
 
-  constructor(private bufferService: BufferService, private audioContextService: AudioContextService) {
+  constructor(
+    private bufferService: BufferService,
+    private audioContextService: AudioContextService
+  ) {
     this.ctx = audioContextService.getContext();
   }
 
   load(soundBank: { [key: number]: string }): Observable<AudioBuffer[]> {
-    return forkJoin(Object.keys(soundBank).map(midi => {
-      return this.bufferService.load(encodeURIComponent(soundBank[midi])).pipe(
-        mergeMap(buffer => fromPromise(this.ctx.decodeAudioData(buffer))),
-        tap(buffer => {
-          this.buffers[midi] = buffer;
-        }));
-    }));
+    return forkJoin(
+      Object.keys(soundBank).map(midi => {
+        return this.bufferService
+          .load(encodeURIComponent(soundBank[midi]))
+          .pipe(
+            mergeMap(buffer => fromPromise(this.ctx.decodeAudioData(buffer))),
+            tap(buffer => {
+              this.buffers[midi] = buffer;
+            })
+          );
+      })
+    );
   }
 
   private trigger(key: Key, when = 0) {
@@ -42,7 +50,7 @@ export class InstrumentService {
   }
 
   private intervalToFrequencyRatio(interval) {
-    return Math.pow(2, (interval / 12));
+    return Math.pow(2, interval / 12);
   }
 
   private findClosestPitch(midi) {
