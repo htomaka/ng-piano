@@ -1,24 +1,28 @@
 import { Event } from './event';
 
 export class Track {
+
+  constructor(startTime: number) {
+    this.startTime = startTime;
+  }
   public title = 'New song';
   public startTime: number;
   public notes: Event[] = [];
 
-  constructor(startTime: number) {
-    this.startTime = startTime;
+  static from(track: Track) {
+    const newTrack = new Track(track.startTime);
+    newTrack.title = track.title;
+    newTrack.startTime = track.startTime;
+    newTrack.notes = track.notes;
+    return newTrack;
   }
 
   add(event: Event) {
     this.notes.push(event);
   }
 
-  getNotes(): Event[] {
-    return this.notes;
-  }
-
   forEachNote(fn: (note: Event) => void) {
-    this.getNotes().forEach(fn);
+    this.notes.forEach(fn);
   }
 
   setTitle(title: string) {

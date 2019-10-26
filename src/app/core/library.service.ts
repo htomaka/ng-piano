@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, ReplaySubject, Subject, throwError } from 'rxjs';
+import {BehaviorSubject, Observable, of, ReplaySubject, Subject, throwError} from 'rxjs';
 import { Track } from './models/track';
 import { startWith } from 'rxjs/operators';
 
@@ -8,9 +8,9 @@ import { startWith } from 'rxjs/operators';
 })
 export class LibraryService {
   private activeTrackSubject = new ReplaySubject<Track>(1);
-  private activeTrackIndex = 0;
+  private activeTrackIndex = -1;
   public tracks: Track[] = [];
-  public activeTrack$ = this.activeTrackSubject.asObservable().pipe(startWith(this.loadTrackPreview()));
+  public activeTrack$ = this.activeTrackSubject.asObservable();
 
   constructor() {}
 
@@ -39,7 +39,8 @@ export class LibraryService {
   }
 
   loadTracks(): Observable<Track[]> {
-    return of(this.tracks).pipe(startWith([]));
+    this.nextTrack();
+    return of(this.tracks);
   }
 
   loadTrack(): Observable<Track> {

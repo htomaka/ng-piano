@@ -1,7 +1,10 @@
 <div class="piano">
-  <ht-piano-display [state]="state$ | async">
-    <ht-piano-controls [controls]="commands$ | async"></ht-piano-controls>
-  </ht-piano-display>
+  <div class="piano-panel-wrapper">
+    <div class="piano-panel">
+      <ht-piano-display [state]="state$ | async"></ht-piano-display>
+      <ht-piano-controls [controls]="commands$ | async"></ht-piano-controls>
+    </div>
+  </div>
   <ht-piano-transport
     (transportRecord)="transportRecord()"
     (transportPlay)="transportStart()"

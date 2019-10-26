@@ -5,8 +5,10 @@ import {Component, Input} from '@angular/core';
   template: `
       <span class="piano-display-line">{{data.activeInstrument}}</span>
       <span class="piano-display-line">{{data.activeSong?.title || 'No song'}}</span>
-      <span class="inverted">Songs</span>
-      <span class="inverted">Sounds</span>
+      <div class="piano-display-menu">
+          <span class="piano-display-menu-item">Songs</span>
+          <span class="piano-display-menu-item">Sounds</span>
+      </div>
   `
 })
 export class IdleDisplayComponent implements DisplayComponent {

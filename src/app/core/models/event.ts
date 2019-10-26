@@ -9,8 +9,4 @@ export class Event {
     this.note = note;
     this.startTime = startTime;
   }
-
-  get duration(): number {
-    return this.stopTime - this.startTime;
-  }
 }

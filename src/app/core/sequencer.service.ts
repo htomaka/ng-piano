@@ -5,7 +5,7 @@ import {Key} from './models/key';
 import {ReplaySubject, Subject} from 'rxjs';
 import {take} from 'rxjs/operators';
 import {Track} from './models/track';
-import {AppStates} from './models/states';
+import {AppStates} from './models/appStates';
 
 @Injectable({
   providedIn: 'root'
@@ -126,8 +126,6 @@ export class SequencerService {
   }
 
   setActiveTrack(track: Track) {
-    this.activeTrack = new Track(track.startTime);
-    this.activeTrack.title = track.title;
-    this.activeTrack.notes = track.notes;
+    this.activeTrack = Track.from(track);
   }
 }

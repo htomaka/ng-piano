@@ -16,7 +16,7 @@ export class KeyboardService {
     for (let i = low; i <= high; i++) {
       this.keys.set(i, {
         note: new Note(i),
-        isPressed: false
+        isActive: false
       });
     }
 
@@ -24,12 +24,12 @@ export class KeyboardService {
   }
 
   noteOn(key: Key) {
-    key.isPressed = true;
+    key.isActive = true;
     this.trigger(key);
   }
 
   noteOff(key: Key) {
-    key.isPressed = false;
+    key.isActive = false;
     this.trigger(key);
   }
 

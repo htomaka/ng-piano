@@ -6,7 +6,7 @@ import {SavingSongDisplayComponent} from './savingSongDisplay.component';
 import {LoadingSongDisplayComponent} from './loadingSongDisplay.component';
 import {IdleDisplayComponent} from './idleDisplay.component';
 import {DisplayItem} from './display-item';
-import {AppStates} from '../../core/models/states';
+import {AppStates} from '../../core/models/appStates';
 import {SequencerService} from '../../core/sequencer.service';
 import {LibraryService} from '../../core/library.service';
 

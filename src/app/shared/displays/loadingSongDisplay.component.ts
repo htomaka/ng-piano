@@ -6,10 +6,12 @@ import {Track} from '../../core/models/track';
   template: `
       <span class="piano-display-line">Load song</span>
       <span class="piano-display-line">{{activeSong?.title || 'No songs in library'}}</span>
-      <span class="inverted">Prev</span>
-      <span class="inverted">Next</span>
-      <span class="inverted">Cancel</span>
-      <span class="inverted">Confirm</span>
+      <div class="piano-display-menu">
+          <span class="piano-display-menu-item">Prev</span>
+          <span class="piano-display-menu-item">Next</span>
+          <span class="piano-display-menu-item">Cancel</span>
+          <span class="piano-display-menu-item">Confirm</span>
+      </div>
   `
 })
 export class LoadingSongDisplayComponent implements DisplayComponent, OnInit {

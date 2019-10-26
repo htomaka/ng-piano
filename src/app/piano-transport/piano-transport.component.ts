@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import {AppStates} from '../core/models/states';
+import {AppStates} from '../core/models/appStates';
 
 @Component({
   selector: 'ht-piano-transport',

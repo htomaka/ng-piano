@@ -4,15 +4,22 @@
   background: darkseagreen
   padding: 1px 1px 0 1px
   font-family: 'VT323', monospace
-  & .inverted
-    background: #181818
-    color: darkseagreen
-    margin-right: 1px
+  min-height: 3rem
+
+  .piano-display-menu
+    display: flex
+
+    &-item
+      background: #181818
+      color: darkseagreen
+      margin-right: 1px
+      min-width: 3rem
+      text-align: center
 
   &-line
     display: block
 
-  input
+  .piano-display-input
     font-family: 'VT323', monospace
     color: #181818
     background: transparent

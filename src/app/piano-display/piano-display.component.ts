@@ -2,7 +2,7 @@ import {Component, ComponentFactoryResolver, Input, OnChanges, OnInit, SimpleCha
 import {DisplayDirective} from '../shared/displays/display.directive';
 import {DisplayService} from '../shared/displays/display.service';
 import {DisplayItem} from '../shared/displays/display-item';
-import {AppStates} from '../core/models/states';
+import {AppStates} from '../core/models/appStates';
 
 @Component({
   selector: 'ht-piano-display',

@@ -11,7 +11,7 @@ import { LibraryService } from '../core/library.service';
 import { switchMap, take } from 'rxjs/operators';
 import { Track } from '../core/models/track';
 import { CommandsService } from '../shared/commands/commands.service';
-import {AppStates} from '../core/models/states';
+import {AppStates} from '../core/models/appStates';
 
 @Component({
   selector: 'ht-piano',
@@ -47,13 +47,13 @@ export class PianoComponent implements OnInit {
       if (event.type === midiCommand.NOTE_ON) {
         const key = {
           note: new Note(event.note),
-          isPressed: true
+          isActive: true
         };
         this.instrumentPlay(key);
       } else {
         const key = {
           note: new Note(event.note),
-          isPressed: false
+          isActive: false
         };
         this.instrumentStop(key);
       }

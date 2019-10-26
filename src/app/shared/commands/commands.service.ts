@@ -7,7 +7,7 @@ import { RecordingSongCommands } from './recordingSongCommands';
 import { SavingSongCommands } from './savingSongCommands';
 import { LoadingSongCommands } from './loadingSongCommands';
 import { IdleCommands } from './idleCommands';
-import {AppStates} from '../../core/models/states';
+import {AppStates} from '../../core/models/appStates';
 
 @Injectable({
   providedIn: 'root'
