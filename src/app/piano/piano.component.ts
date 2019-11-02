@@ -1,16 +1,16 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { Key } from '../core/models/key';
-import { InstrumentService } from '../core/instrument.service';
-import { SequencerService } from '../core/sequencer.service';
-import { Event } from '../core/models/event';
-import { Note } from '../core/models/note';
-import { midiCommand, MidiService } from '../core/midi.service';
-import { KeyboardService } from '../core/keyboard.service';
-import { AudioContextService } from '../core/audio-context.service';
-import { LibraryService } from '../core/library.service';
-import { switchMap, take } from 'rxjs/operators';
-import { Track } from '../core/models/track';
-import { CommandsService } from '../shared/commands/commands.service';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {Key} from '../core/models/key';
+import {InstrumentService} from '../core/instrument.service';
+import {SequencerService} from '../core/sequencer.service';
+import {Event} from '../core/models/event';
+import {Note} from '../core/models/note';
+import {midiCommand, MidiService} from '../core/midi.service';
+import {KeyboardService} from '../core/keyboard.service';
+import {AudioContextService} from '../core/audio-context.service';
+import {LibraryService} from '../core/library.service';
+import {switchMap, take} from 'rxjs/operators';
+import {Track} from '../core/models/track';
+import {CommandsService} from '../shared/commands/commands.service';
 import {AppStates} from '../core/models/appStates';
 
 @Component({
@@ -19,6 +19,7 @@ import {AppStates} from '../core/models/appStates';
   styleUrls: ['./piano.component.sass']
 })
 export class PianoComponent implements OnInit {
+  private tempo = 120;
   public keys: Key[];
   public tracks: Track[];
   public commands$ = this.commands.commands$;
@@ -33,44 +34,16 @@ export class PianoComponent implements OnInit {
     private audio: AudioContextService,
     private library: LibraryService,
     private commands: CommandsService
-  ) {}
+  ) {
+  }
 
   ngOnInit() {
-    this.library
-      .loadBank('m1_piano')
-      .pipe(switchMap(soundBank => this.instrument.load(soundBank)))
-      .subscribe();
-
-    this.midi.getMidi().subscribe();
-
-    this.midi.midiMessage$.subscribe(event => {
-      if (event.type === midiCommand.NOTE_ON) {
-        const key = {
-          note: new Note(event.note),
-          isActive: true
-        };
-        this.instrumentPlay(key);
-      } else {
-        const key = {
-          note: new Note(event.note),
-          isActive: false
-        };
-        this.instrumentStop(key);
-      }
-    });
-
-    this.keyboard.build();
-
-    this.keyboard.keys$.subscribe(keys => {
-      this.keys = keys;
-      this.changeDetector.detectChanges();
-    });
+    this.loadInstrument('M1_piano');
+    this.initMidi();
+    this.initKeyboard();
+    this.initSequencer();
 
     this.commands.get(this, this.sequencer.getState());
-
-    this.sequencer.state$.subscribe((state: AppStates) => {
-      this.commands.get(this, state);
-    });
   }
 
   instrumentPlay(key: Key) {
@@ -95,10 +68,10 @@ export class PianoComponent implements OnInit {
   transportStart() {
     this.sequencer.play((event: Event) => {
       const now = this.audio.getCurrentTime();
-      const secondsPerBeat = 60.0 / 60;
+      const secondsPerBeat = 60 / this.tempo;
       const newEvent = new Event(
         event.note,
-        now + event.startTime * secondsPerBeat
+        now + event.startTime
       );
       newEvent.stopTime = now + event.stopTime * secondsPerBeat;
       this.instrument.playback(newEvent);
@@ -159,5 +132,47 @@ export class PianoComponent implements OnInit {
       .subscribe((song: Track) => {
         this.sequencer.confirmLoadSong(song);
       });
+  }
+
+
+  private loadInstrument(name: string) {
+    this.library
+      .loadBank(name)
+      .pipe(switchMap(soundBank => this.instrument.load(soundBank)))
+      .subscribe();
+  }
+
+  private initMidi() {
+    this.midi.getMidi().subscribe();
+    this.midi.midiMessage$.subscribe(event => {
+      if (event.type === midiCommand.NOTE_ON) {
+        const key = {
+          note: new Note(event.note),
+          isActive: true
+        };
+        this.instrumentPlay(key);
+      } else {
+        const key = {
+          note: new Note(event.note),
+          isActive: false
+        };
+        this.instrumentStop(key);
+      }
+    });
+  }
+
+  private initKeyboard() {
+    this.keyboard.build();
+
+    this.keyboard.keys$.subscribe(keys => {
+      this.keys = keys;
+      this.changeDetector.detectChanges();
+    });
+  }
+
+  private initSequencer() {
+    this.sequencer.state$.subscribe((state: AppStates) => {
+      this.commands.get(this, state);
+    });
   }
 }

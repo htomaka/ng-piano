@@ -6,6 +6,8 @@ import {ReplaySubject, Subject} from 'rxjs';
 import {take} from 'rxjs/operators';
 import {Track} from './models/track';
 import {AppStates} from './models/appStates';
+import {get} from 'lodash';
+import {SequencerCommand, sequencerCommands} from './sequencer-commands';
 
 @Injectable({
   providedIn: 'root'
@@ -18,6 +20,7 @@ export class SequencerService {
   private confirmSubject = new Subject<string>();
   private saveSubject = new ReplaySubject<Track>(1);
   private stateSubject = new Subject<AppStates>();
+  private readonly commands: SequencerCommand;
   public activeTrack: Track;
   public stop$ = this.stopSubject.asObservable();
   public load$ = this.loadSubject.asObservable();
@@ -25,7 +28,9 @@ export class SequencerService {
   public save$ = this.saveSubject.asObservable();
   public state$ = this.stateSubject.asObservable();
 
-  constructor(private audioContextService: AudioContextService) {}
+  constructor(private audioContextService: AudioContextService) {
+    this.commands = sequencerCommands(this);
+  }
 
   noteOn(key: Key) {
     const event = new Event(
@@ -54,30 +59,16 @@ export class SequencerService {
   }
 
   play(fn: (event: Event) => void) {
-    if (this.getState() === AppStates.SEQUENCER_RECORDING_ARMED) {
-      this.setState(AppStates.SEQUENCER_RECORDING);
-    } else {
-      if (!this.activeTrack) {
-        return;
-      }
-      this.setState(AppStates.SEQUENCER_PLAYING);
-      this.activeTrack.forEachNote(note => {
-        fn(note);
-      });
+    const command = get(this.commands, this.getState());
+    if (command) {
+      command.play(fn);
     }
   }
 
   stop() {
-    if (this.getState() === AppStates.SEQUENCER_PLAYING) {
-      this.setState(AppStates.SEQUENCER_STOP);
-    }
-
-    if (this.getState() === AppStates.SEQUENCER_RECORDING) {
-      this.save();
-    }
-
-    if (this.getState() === AppStates.SEQUENCER_RECORDING_ARMED) {
-      this.setState(AppStates.SEQUENCER_STOP);
+    const command = get(this.commands, this.getState());
+    if (command) {
+      command.stop();
     }
   }
 
@@ -101,7 +92,7 @@ export class SequencerService {
   }
 
   confirmSaveSong() {
-      this.confirmSubject.next();
+    this.confirmSubject.next();
   }
 
   cancel() {
