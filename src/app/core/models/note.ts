@@ -1,5 +1,18 @@
 const A4 = 440;
-const scaleIndexToNote = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const scaleIndexToNote = [
+  'C',
+  'C#',
+  'D',
+  'D#',
+  'E',
+  'F',
+  'F#',
+  'G',
+  'G#',
+  'A',
+  'A#',
+  'B'
+];
 
 export class Note {
   constructor(private readonly value: number) {
@@ -24,10 +37,6 @@ export class Note {
     }
     const noteName = scaleIndexToNote[noteNumber % 12];
     return noteName + octave.toString();
-  }
-
-  valueOf() {
-    return this.value;
   }
 
   isFlat() {

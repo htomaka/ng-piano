@@ -1,5 +1,5 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {Key} from './model/key';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Key } from '../../core/models/key';
 
 @Component({
   selector: 'ht-piano-key',
@@ -9,19 +9,18 @@ import {Key} from './model/key';
 export class PianoKeyComponent implements OnInit {
   @Input() key: Key;
   @Input() index: number;
-  @Output() keyPress = new EventEmitter<Key>();
+  @Output() noteOn = new EventEmitter<Key>();
+  @Output() noteOff = new EventEmitter<Key>();
 
-  constructor() { }
+  constructor() {}
 
-  ngOnInit() {
+  ngOnInit() {}
+
+  handleNoteOn() {
+    this.noteOn.emit(this.key);
   }
 
-  onMouseDown() {
-    this.key.isPressed = true;
-    this.keyPress.emit(this.key);
-  }
-
-  onMouseUp() {
-    this.key.isPressed = false;
+  handleNoteOff() {
+    this.noteOff.emit(this.key);
   }
 }
