@@ -1,7 +1,10 @@
 import { Injectable } from '@angular/core';
 import {BehaviorSubject, Observable, of, ReplaySubject, Subject, throwError} from 'rxjs';
 import { Track } from './models/track';
-import { startWith } from 'rxjs/operators';
+import {map, startWith, tap} from 'rxjs/operators';
+import {SongsService} from './gql/songs.service';
+import {SaveSongResponse, SaveSongService} from './gql/save-song.service';
+import {FetchResult} from 'apollo-link';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +15,7 @@ export class LibraryService {
   public tracks: Track[] = [];
   public activeTrack$ = this.activeTrackSubject.asObservable();
 
-  constructor() {}
+  constructor(private songsGql: SongsService, private saveSongGql: SaveSongService) {}
 
   loadBank(soundBank: string): Observable<{ [key: string]: string }> {
     return of({
@@ -33,14 +36,20 @@ export class LibraryService {
     });
   }
 
-  saveTrack(track: Track): Observable<Track> {
-    this.tracks.push(track);
-    return of(track);
+  saveTrack(track: Track): Observable<FetchResult<any>> {
+    return this.saveSongGql.mutate({
+      song: track.toJSON()
+    });
   }
 
   loadTracks(): Observable<Track[]> {
-    this.nextTrack();
-    return of(this.tracks);
+    this.activeTrackIndex = -1;
+    return this.songsGql.fetch()
+      .pipe(
+        map(result => result.data.songs),
+        tap((songs: Track[]) => this.tracks = songs),
+        tap(() => this.nextTrack())
+      );
   }
 
   loadTrack(): Observable<Track> {

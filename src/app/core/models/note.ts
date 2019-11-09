@@ -15,7 +15,9 @@ const scaleIndexToNote = [
 ];
 
 export class Note {
-  constructor(private readonly value: number) {
+  private readonly value: number;
+
+  constructor(value: number) {
     this.value = value;
   }
 
