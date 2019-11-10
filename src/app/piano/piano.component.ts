@@ -7,11 +7,12 @@ import {Note} from '../core/models/note';
 import {midiCommand, MidiService} from '../core/midi.service';
 import {KeyboardService} from '../core/keyboard.service';
 import {AudioContextService} from '../core/audio-context.service';
-import {LibraryService} from '../core/library.service';
+import {TracksService} from '../core/tracks.service';
 import {switchMap, take} from 'rxjs/operators';
 import {Track} from '../core/models/track';
 import {CommandsService} from '../shared/commands/commands.service';
 import {AppStates} from '../core/models/appStates';
+import {SoundsService} from '../core/sounds.service';
 
 @Component({
   selector: 'ht-piano',
@@ -32,8 +33,9 @@ export class PianoComponent implements OnInit {
     private keyboard: KeyboardService,
     private changeDetector: ChangeDetectorRef,
     private audio: AudioContextService,
-    private library: LibraryService,
-    private commands: CommandsService
+    private tracks: TracksService,
+    private commands: CommandsService,
+    private sounds: SoundsService
   ) {
   }
 
@@ -99,7 +101,7 @@ export class PianoComponent implements OnInit {
       .pipe(
         take(1),
         switchMap(() => {
-          return this.library.loadTracks();
+          return this.tracks.loadTracks();
         })
       )
       .subscribe((tracks: Track[]) => {
@@ -108,11 +110,11 @@ export class PianoComponent implements OnInit {
   }
 
   loadNextSong() {
-    this.library.nextTrack();
+    this.tracks.nextTrack();
   }
 
   loadPrevSong() {
-    this.library.prevTrack();
+    this.tracks.prevTrack();
   }
 
   saveSong(): void {
@@ -120,13 +122,13 @@ export class PianoComponent implements OnInit {
     this.sequencer.save$
       .pipe(
         take(1),
-        switchMap((track: Track) => this.library.saveTrack(track))
+        switchMap((track: Track) => this.tracks.save(track))
       )
       .subscribe();
   }
 
   loadSong() {
-    return this.library
+    return this.tracks
       .loadTrack()
       .pipe(take(1))
       .subscribe((song: Track) => {
@@ -136,8 +138,8 @@ export class PianoComponent implements OnInit {
 
 
   private loadInstrument(name: string) {
-    this.library
-      .loadBank(name)
+    this.sounds
+      .load(name)
       .pipe(switchMap(soundBank => this.instrument.load(soundBank)))
       .subscribe();
   }

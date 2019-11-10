@@ -16,7 +16,7 @@ export class Track {
     const newTrack = new Track(track.startTime);
     newTrack.title = track.title;
     newTrack.startTime = track.startTime;
-    newTrack.notes = track.notes.map(note => {
+    newTrack.notes = track.notes.map((note) => {
       const e = new Event({
         note: new Note(note.note as number),
         isActive: false

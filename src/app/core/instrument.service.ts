@@ -39,7 +39,6 @@ export class InstrumentService {
   private trigger(key: Key, when = 0) {
     const source = this.ctx.createBufferSource();
     const midi = key.note.toMidi();
-    // find the closest note pitch
     const difference = this.findClosestPitch(midi);
     const closestNote = midi - difference;
     const playbackRate = this.intervalToFrequencyRatio(difference);

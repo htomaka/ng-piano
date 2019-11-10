@@ -60,14 +60,14 @@ export class SequencerService {
 
   play(fn: (event: Event) => void) {
     const command = get(this.commands, this.getState());
-    if (command) {
+    if (command && command.play) {
       command.play(fn);
     }
   }
 
   stop() {
     const command = get(this.commands, this.getState());
-    if (command) {
+    if (command && command.stop) {
       command.stop();
     }
   }
