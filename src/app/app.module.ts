@@ -21,10 +21,9 @@ import {PlayingSongDisplayComponent} from './shared/displays/playingSongDisplay.
 import {RecordingArmedDisplayComponent} from './shared/displays/recordingArmedDisplay.component';
 import {RecordingSongDisplayComponent} from './shared/displays/recordingSongDisplay.component';
 import {SavingSongDisplayComponent} from './shared/displays/savingSongDisplay.component';
-import { GraphQLModule } from './graphql.module';
-import {APOLLO_OPTIONS, ApolloModule} from 'apollo-angular';
-import {HttpLink, HttpLinkModule} from 'apollo-angular-link-http';
-import {InMemoryCache} from 'apollo-cache-inmemory';
+import {GqlModule} from './core/gql/gql.module';
+import {ApolloModule} from 'apollo-angular';
+import {HttpLinkModule} from 'apollo-angular-link-http';
 
 @NgModule({
   declarations: [
@@ -57,7 +56,7 @@ import {InMemoryCache} from 'apollo-cache-inmemory';
     BrowserModule,
     HttpClientModule,
     FormsModule,
-    GraphQLModule,
+    GqlModule,
     ApolloModule,
     HttpLinkModule
   ],
@@ -65,19 +64,7 @@ import {InMemoryCache} from 'apollo-cache-inmemory';
     InstrumentService,
     BufferService,
     MidiService,
-    KeyboardService,
-    {
-      provide: APOLLO_OPTIONS,
-      useFactory: (httpLink: HttpLink) => {
-        return {
-          cache: new InMemoryCache(),
-          link: httpLink.create({
-            uri: 'http://localhost:4000/'
-          })
-        };
-      },
-      deps: [HttpLink]
-    }
+    KeyboardService
   ],
   bootstrap: [AppComponent]
 })

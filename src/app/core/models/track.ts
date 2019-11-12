@@ -1,6 +1,4 @@
 import {Event} from './event';
-import {Note} from './note';
-import {Key} from './key';
 
 export class Track {
 
@@ -17,10 +15,7 @@ export class Track {
     newTrack.title = track.title;
     newTrack.startTime = track.startTime;
     newTrack.notes = track.notes.map((note) => {
-      const e = new Event({
-        note: new Note(note.note as number),
-        isActive: false
-      } as Key, note.startTime);
+      const e = new Event(note.note, note.startTime);
       e.stopTime = note.stopTime;
       return e;
     });
@@ -44,7 +39,7 @@ export class Track {
       title: this.title,
       startTime: this.startTime,
       notes: this.notes.map(note => {
-        return {...note, note: note.note.note.toMidi()};
+        return {...note, note: note.note};
       })
     };
   }

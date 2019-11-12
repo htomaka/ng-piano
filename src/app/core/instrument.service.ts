@@ -36,11 +36,10 @@ export class InstrumentService {
     );
   }
 
-  private trigger(key: Key, when = 0) {
+  private trigger(midiNote: number, when = 0) {
     const source = this.ctx.createBufferSource();
-    const midi = key.note.toMidi();
-    const difference = this.findClosestPitch(midi);
-    const closestNote = midi - difference;
+    const difference = this.findClosestPitch(midiNote);
+    const closestNote = midiNote - difference;
     const playbackRate = this.intervalToFrequencyRatio(difference);
     source.buffer = this.buffers[closestNote];
     source.connect(this.ctx.destination);
@@ -68,11 +67,11 @@ export class InstrumentService {
     throw new Error('No available buffers for note: ' + midi);
   }
 
-  public play(key: Key) {
-    this.trigger(key);
+  public play(note: number) {
+    this.trigger(note);
   }
 
-  public playback(event: Event) {
+  public playAtTime(event: Event) {
     this.trigger(event.note, event.startTime);
   }
 }

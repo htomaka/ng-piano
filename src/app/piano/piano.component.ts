@@ -13,6 +13,7 @@ import {Track} from '../core/models/track';
 import {CommandsService} from '../shared/commands/commands.service';
 import {AppStates} from '../core/models/appStates';
 import {SoundsService} from '../core/sounds.service';
+import {TransportService} from '../core/transport.service';
 
 @Component({
   selector: 'ht-piano',
@@ -20,9 +21,8 @@ import {SoundsService} from '../core/sounds.service';
   styleUrls: ['./piano.component.sass']
 })
 export class PianoComponent implements OnInit {
-  private tempo = 120;
   public keys: Key[];
-  public tracks: Track[];
+  public trackList: Track[];
   public commands$ = this.commands.commands$;
   public state$ = this.sequencer.state$;
 
@@ -35,7 +35,8 @@ export class PianoComponent implements OnInit {
     private audio: AudioContextService,
     private tracks: TracksService,
     private commands: CommandsService,
-    private sounds: SoundsService
+    private sounds: SoundsService,
+    private transport: TransportService
   ) {
   }
 
@@ -49,7 +50,7 @@ export class PianoComponent implements OnInit {
   }
 
   instrumentPlay(key: Key) {
-    this.instrument.play(key);
+    this.instrument.play(key.note.toMidi());
     this.keyboard.noteOn(key);
     if (this.sequencer.getState() === AppStates.SEQUENCER_RECORDING) {
       this.sequencer.noteOn(key);
@@ -69,21 +70,9 @@ export class PianoComponent implements OnInit {
 
   transportStart() {
     this.sequencer.play((event: Event) => {
-      const now = this.audio.getCurrentTime();
-      const secondsPerBeat = 60 / this.tempo;
-      const newEvent = new Event(
-        event.note,
-        now + event.startTime
-      );
-      newEvent.stopTime = now + event.stopTime * secondsPerBeat;
-      this.instrument.playback(newEvent);
-      setTimeout(() => {
-        this.keyboard.noteOn(event.note);
-      }, event.startTime * 1000);
-
-      setTimeout(() => {
-        this.keyboard.noteOff(event.note);
-      }, event.stopTime * 1000);
+      this.transport.schedule(event, this.instrument.playAtTime.bind(this.instrument));
+      this.keyboard.scheduleNoteOn(event);
+      this.keyboard.scheduleNoteOff(event);
     });
   }
 
@@ -101,11 +90,11 @@ export class PianoComponent implements OnInit {
       .pipe(
         take(1),
         switchMap(() => {
-          return this.tracks.loadTracks();
+          return this.tracks.getAll();
         })
       )
       .subscribe((tracks: Track[]) => {
-        this.tracks = tracks;
+        this.trackList = tracks;
       });
   }
 
@@ -129,7 +118,7 @@ export class PianoComponent implements OnInit {
 
   loadSong() {
     return this.tracks
-      .loadTrack()
+      .get()
       .pipe(take(1))
       .subscribe((song: Track) => {
         this.sequencer.confirmLoadSong(song);
@@ -146,19 +135,16 @@ export class PianoComponent implements OnInit {
 
   private initMidi() {
     this.midi.getMidi().subscribe();
-    this.midi.midiMessage$.subscribe(event => {
-      if (event.type === midiCommand.NOTE_ON) {
-        const key = {
-          note: new Note(event.note),
-          isActive: true
-        };
-        this.instrumentPlay(key);
+    this.midi.midiMessage$.subscribe(msg => {
+      const event = {
+        note: new Note(msg.note),
+        isActive: msg.type === midiCommand.NOTE_ON
+      };
+
+      if (msg.type === midiCommand.NOTE_ON) {
+        this.instrumentPlay(event);
       } else {
-        const key = {
-          note: new Note(event.note),
-          isActive: false
-        };
-        this.instrumentStop(key);
+        this.instrumentStop(event);
       }
     });
   }

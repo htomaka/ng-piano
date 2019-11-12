@@ -9,7 +9,10 @@ export function sequencerCommands(ctx: SequencerService): SequencerCommand {
   return {
     [AppStates.SEQUENCER_RECORDING_ARMED]: {
       stop: () => ctx.setState(AppStates.SEQUENCER_STOP),
-      play: () => ctx.setState(AppStates.SEQUENCER_RECORDING)
+      play: () => {
+        ctx.setState(AppStates.SEQUENCER_RECORDING);
+        ctx.transport.start();
+      }
     },
     [AppStates.SEQUENCER_PLAYING]: {
       stop: () => ctx.setState(AppStates.SEQUENCER_STOP),
@@ -28,7 +31,10 @@ export function sequencerCommands(ctx: SequencerService): SequencerCommand {
       stop: () => {}
     },
     [AppStates.SEQUENCER_RECORDING]: {
-      stop: () => ctx.save()
+      stop: () => {
+        ctx.save();
+        ctx.transport.stop();
+      }
     }
   };
 }

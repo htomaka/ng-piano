@@ -8,6 +8,7 @@ import {Track} from './models/track';
 import {AppStates} from './models/appStates';
 import {get} from 'lodash';
 import {SequencerCommand, sequencerCommands} from './sequencer-commands';
+import {TransportService} from './transport.service';
 
 @Injectable({
   providedIn: 'root'
@@ -28,15 +29,12 @@ export class SequencerService {
   public save$ = this.saveSubject.asObservable();
   public state$ = this.stateSubject.asObservable();
 
-  constructor(private audioContextService: AudioContextService) {
+  constructor(public transport: TransportService) {
     this.commands = sequencerCommands(this);
   }
 
   noteOn(key: Key) {
-    const event = new Event(
-      key,
-      this.audioContextService.getCurrentTime() - this.activeTrack.startTime
-    );
+    const event = new Event(key.note.toMidi(), this.transport.getCurrentTime());
     this.scheduleNote(event);
   }
 
@@ -47,15 +45,14 @@ export class SequencerService {
   scheduleNote(event: Event) {
     // schedule note on note off event in order to get note duration
     this.stop$.pipe(take(1)).subscribe(() => {
-      event.stopTime =
-        this.audioContextService.getCurrentTime() - this.activeTrack.startTime;
+      event.stopTime = this.transport.getCurrentTime();
       this.activeTrack.add(event);
     });
   }
 
   record() {
     this.setState(AppStates.SEQUENCER_RECORDING_ARMED);
-    this.activeTrack = new Track(this.audioContextService.getCurrentTime());
+    this.activeTrack = new Track(this.transport.getCurrentTime());
   }
 
   play(fn: (event: Event) => void) {

@@ -5,6 +5,7 @@ import {catchError, map, startWith, tap} from 'rxjs/operators';
 import {SongsService} from './gql/songs.service';
 import {SaveSongResponse, SaveSongService} from './gql/save-song.service';
 import {FetchResult} from 'apollo-link';
+import {AppStates} from './models/appStates';
 
 @Injectable({
   providedIn: 'root'
@@ -12,6 +13,7 @@ import {FetchResult} from 'apollo-link';
 export class TracksService {
   private activeTrackSubject = new ReplaySubject<Track>(1);
   private activeTrackIndex = -1;
+  private state: AppStates;
   public tracks: Track[] = [];
   public activeTrack$ = this.activeTrackSubject.asObservable();
 
@@ -25,7 +27,7 @@ export class TracksService {
     });
   }
 
-  load(): Observable<Track[]> {
+  getAll(): Observable<Track[]> {
     this.activeTrackIndex = -1;
     return this.songsGql.fetch()
       .pipe(
@@ -35,7 +37,7 @@ export class TracksService {
       );
   }
 
-  loadTrack(): Observable<Track> {
+  get(): Observable<Track> {
     return this.activeTrackIndex > -1
       ? of(this.loadPreview())
       : throwError(`song not found`);
