@@ -13,8 +13,7 @@ export function sequencerCommands(ctx: SequencerService): SequencerCommand {
     },
     [AppStates.SEQUENCER_PLAYING]: {
       stop: () => ctx.setState(AppStates.SEQUENCER_STOP),
-      play: () => {
-      }
+      play: () => {}
     },
     [AppStates.SEQUENCER_STOP]: {
       play: (fn) => {
@@ -25,7 +24,8 @@ export function sequencerCommands(ctx: SequencerService): SequencerCommand {
         ctx.activeTrack.forEachNote(note => {
           fn(note);
         });
-      }
+      },
+      stop: () => {}
     },
     [AppStates.SEQUENCER_RECORDING]: {
       stop: () => ctx.save()

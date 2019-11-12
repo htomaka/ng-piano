@@ -8,14 +8,14 @@ import {IdleDisplayComponent} from './idleDisplay.component';
 import {DisplayItem} from './display-item';
 import {AppStates} from '../../core/models/appStates';
 import {SequencerService} from '../../core/sequencer.service';
-import {LibraryService} from '../../core/library.service';
+import {TracksService} from '../../core/tracks.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DisplayService {
 
-  constructor(private sequencer: SequencerService, private library: LibraryService) {
+  constructor(private sequencer: SequencerService, private library: TracksService) {
   }
 
   getDisplay(state: AppStates): DisplayItem {

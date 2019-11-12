@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "ng serve --poll=2000",
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
@@ -21,11 +21,18 @@
     "@angular/platform-browser-dynamic": "~8.2.5",
     "@angular/router": "~8.2.5",
     "@types/webmidi": "^2.0.3",
+    "apollo-angular": "^1.8.0",
     "lodash": "^4.17.15",
     "rxjs": "~6.4.0",
     "tone": "^13.8.25",
     "tslib": "^1.10.0",
-    "zone.js": "~0.9.1"
+    "zone.js": "~0.9.1",
+    "apollo-angular-link-http": "^1.9.0",
+    "apollo-link": "^1.2.11",
+    "apollo-client": "^2.6.0",
+    "apollo-cache-inmemory": "^1.6.0",
+    "graphql-tag": "^2.10.0",
+    "graphql": "^14.5.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "~0.803.4",
