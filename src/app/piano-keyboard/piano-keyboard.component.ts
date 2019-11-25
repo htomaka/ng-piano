@@ -8,7 +8,6 @@ import {
   SimpleChanges
 } from '@angular/core';
 import { Key } from '../core/models/key';
-import { Note } from '../core/models/note';
 
 @Component({
   selector: 'ht-piano-keyboard',

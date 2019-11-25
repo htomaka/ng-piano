@@ -11,7 +11,6 @@ export function sequencerCommands(ctx: SequencerService): SequencerCommand {
       stop: () => ctx.setState(AppStates.SEQUENCER_STOP),
       play: () => {
         ctx.setState(AppStates.SEQUENCER_RECORDING);
-        ctx.transport.start();
       }
     },
     [AppStates.SEQUENCER_PLAYING]: {
@@ -19,21 +18,17 @@ export function sequencerCommands(ctx: SequencerService): SequencerCommand {
       play: () => {}
     },
     [AppStates.SEQUENCER_STOP]: {
-      play: (fn) => {
+      play: () => {
         if (!ctx.activeTrack) {
           return;
         }
         ctx.setState(AppStates.SEQUENCER_PLAYING);
-        ctx.activeTrack.forEachNote(note => {
-          fn(note);
-        });
       },
       stop: () => {}
     },
     [AppStates.SEQUENCER_RECORDING]: {
       stop: () => {
         ctx.save();
-        ctx.transport.stop();
       }
     }
   };

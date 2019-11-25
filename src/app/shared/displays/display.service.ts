@@ -9,26 +9,34 @@ import {DisplayItem} from './display-item';
 import {AppStates} from '../../core/models/appStates';
 import {SequencerService} from '../../core/sequencer.service';
 import {TracksService} from '../../core/tracks.service';
+import {ClockService} from '../../core/clock/clock.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DisplayService {
 
-  constructor(private sequencer: SequencerService, private library: TracksService) {
+  constructor(private sequencer: SequencerService, private library: TracksService, private clock: ClockService) {
   }
 
   getDisplay(state: AppStates): DisplayItem {
     let nextDisplay;
     switch (state) {
       case AppStates.SEQUENCER_PLAYING:
-        nextDisplay = new DisplayItem(PlayingSongDisplayComponent, {activeSong: this.sequencer.activeTrack}, null);
+        nextDisplay = new DisplayItem(PlayingSongDisplayComponent, {
+          activeSong: this.sequencer.activeTrack,
+          position$: this.clock.getTicks(),
+          toBarBeatTick: this.clock.toBarBeatTick.bind(this.clock)
+        }, null);
         break;
       case AppStates.SEQUENCER_RECORDING_ARMED:
         nextDisplay = new DisplayItem(RecordingArmedDisplayComponent, null, null);
         break;
       case AppStates.SEQUENCER_RECORDING:
-        nextDisplay = new DisplayItem(RecordingSongDisplayComponent, null, null);
+        nextDisplay = new DisplayItem(RecordingSongDisplayComponent, {
+          position$: this.clock.getTicks(),
+          toBarBeatTick: this.clock.toBarBeatTick.bind(this.clock)
+        }, null);
         break;
       case AppStates.LIBRARY_SAVING_SONG:
         nextDisplay = new DisplayItem(SavingSongDisplayComponent, {activeSong: this.sequencer.activeTrack}, {

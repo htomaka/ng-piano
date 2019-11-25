@@ -1,37 +1,42 @@
 import {Injectable} from '@angular/core';
 import {AudioContextService} from './audio-context.service';
 import {Event} from './models/event';
+import {ClockService} from './clock/clock.service';
+import {Track} from './models/track';
+import {Subject} from 'rxjs';
+import {groupBy} from 'lodash';
+import {takeUntil} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TransportService {
-  private currentTime = 0;
   private tempo = 120;
+  private stopSubject = new Subject();
+  private stop$ = this.stopSubject.asObservable();
 
-  constructor(private audioContext: AudioContextService) {
-  }
-
-  getCurrentTime(): number {
-    return this.audioContext.getCurrentTime() - this.currentTime;
+  constructor(private audioContext: AudioContextService, private clock: ClockService) {
+    clock.setTempo(this.tempo);
   }
 
   start() {
-    this.currentTime = this.audioContext.getCurrentTime();
+    this.clock.start();
   }
 
   stop() {
-    this.currentTime = 0;
+    this.clock.stop();
+    this.stopSubject.next();
   }
 
-  schedule(event: Event, callback: (event: Event) => void) {
-    const now = this.audioContext.getCurrentTime();
-    const secondsPerBeat = 60 / this.tempo;
-    const newEvent = new Event(
-      event.note,
-      now + event.startTime
-    );
-    newEvent.stopTime = now + event.stopTime * secondsPerBeat;
-    callback(newEvent);
+  schedule(track: Track, callback: (event: Event) => void) {
+    const eventsByStartTime: { [key: number]: Event[] } = groupBy(track.notes, t => t.startTime);
+    this.clock.getTicks()
+      .pipe(takeUntil(this.stop$))
+      .subscribe(() => {
+        const pos = this.clock.getTick();
+        if (eventsByStartTime[pos]) {
+          callback(eventsByStartTime[pos].pop());
+        }
+      });
   }
 }

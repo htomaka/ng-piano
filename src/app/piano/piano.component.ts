@@ -2,7 +2,6 @@ import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {Key} from '../core/models/key';
 import {InstrumentService} from '../core/instrument.service';
 import {SequencerService} from '../core/sequencer.service';
-import {Event} from '../core/models/event';
 import {Note} from '../core/models/note';
 import {midiCommand, MidiService} from '../core/midi.service';
 import {KeyboardService} from '../core/keyboard.service';
@@ -14,6 +13,7 @@ import {CommandsService} from '../shared/commands/commands.service';
 import {AppStates} from '../core/models/appStates';
 import {SoundsService} from '../core/sounds.service';
 import {TransportService} from '../core/transport.service';
+import {Event} from '../core/models/event';
 
 @Component({
   selector: 'ht-piano',
@@ -69,15 +69,20 @@ export class PianoComponent implements OnInit {
   }
 
   transportStart() {
-    this.sequencer.play((event: Event) => {
-      this.transport.schedule(event, this.instrument.playAtTime.bind(this.instrument));
-      this.keyboard.scheduleNoteOn(event);
-      this.keyboard.scheduleNoteOff(event);
-    });
+    this.sequencer.play();
+    this.transport.start();
+    if (this.sequencer.getState() === AppStates.SEQUENCER_PLAYING) {
+      this.transport.schedule(this.sequencer.activeTrack, (event: Event) => {
+        this.instrument.play(event.note);
+        this.keyboard.scheduleNoteOn(event);
+        this.keyboard.scheduleNoteOff(event);
+      });
+    }
   }
 
   transportStop() {
     this.sequencer.stop();
+    this.transport.stop();
   }
 
   onCancel() {
