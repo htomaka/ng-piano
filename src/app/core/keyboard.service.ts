@@ -43,7 +43,9 @@ export class KeyboardService {
   }
 
   scheduleNoteOff(event: Event) {
-    this.noteOff({note: new Note(event.note), isActive: false});
+    setTimeout(() => {
+      this.noteOff({note: new Note(event.note), isActive: false});
+    }, event.stopTime - event.startTime);
   }
 
   private trigger(key: Key) {
