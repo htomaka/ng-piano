@@ -35,7 +35,7 @@ export class TransportService {
       .subscribe(() => {
         const pos = this.clock.getTick();
         if (eventsByStartTime[pos]) {
-          callback(eventsByStartTime[pos].pop());
+          eventsByStartTime[pos].forEach(callback);
         }
       });
   }
