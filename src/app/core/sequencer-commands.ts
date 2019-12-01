@@ -9,26 +9,27 @@ export function sequencerCommands(ctx: SequencerService): SequencerCommand {
   return {
     [AppStates.SEQUENCER_RECORDING_ARMED]: {
       stop: () => ctx.setState(AppStates.SEQUENCER_STOP),
-      play: () => ctx.setState(AppStates.SEQUENCER_RECORDING)
+      play: () => {
+        ctx.setState(AppStates.SEQUENCER_RECORDING);
+      }
     },
     [AppStates.SEQUENCER_PLAYING]: {
       stop: () => ctx.setState(AppStates.SEQUENCER_STOP),
       play: () => {}
     },
     [AppStates.SEQUENCER_STOP]: {
-      play: (fn) => {
+      play: () => {
         if (!ctx.activeTrack) {
           return;
         }
         ctx.setState(AppStates.SEQUENCER_PLAYING);
-        ctx.activeTrack.forEachNote(note => {
-          fn(note);
-        });
       },
       stop: () => {}
     },
     [AppStates.SEQUENCER_RECORDING]: {
-      stop: () => ctx.save()
+      stop: () => {
+        ctx.save();
+      }
     }
   };
 }

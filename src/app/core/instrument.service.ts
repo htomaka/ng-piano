@@ -1,11 +1,11 @@
-import { Injectable } from '@angular/core';
-import { BufferService } from './buffer.service';
-import { mergeMap, tap } from 'rxjs/operators';
-import { forkJoin, Observable } from 'rxjs';
-import { fromPromise } from 'rxjs/internal-compatibility';
-import { Key } from './models/key';
-import { Event } from './models/event';
-import { AudioContextService } from './audio-context.service';
+import {Injectable} from '@angular/core';
+import {BufferService} from './buffer.service';
+import {mergeMap, tap} from 'rxjs/operators';
+import {forkJoin, Observable} from 'rxjs';
+import {fromPromise} from 'rxjs/internal-compatibility';
+import {Key} from './models/key';
+import {Event} from './models/event';
+import {AudioContextService} from './audio-context.service';
 
 @Injectable({
   providedIn: 'root'
@@ -36,12 +36,20 @@ export class InstrumentService {
     );
   }
 
-  private trigger(key: Key, when = 0) {
+  play(note: number) {
+    this.trigger(note);
+  }
+
+  playAtTime(event: Event) {
+    this.trigger(event.note, event.startTime);
+  }
+
+  private trigger(midiNote: number, when = 0) {
     const source = this.ctx.createBufferSource();
-    const midi = key.note.toMidi();
-    const difference = this.findClosestPitch(midi);
-    const closestNote = midi - difference;
+    const difference = this.findClosestPitch(midiNote);
+    const closestNote = midiNote - difference;
     const playbackRate = this.intervalToFrequencyRatio(difference);
+
     source.buffer = this.buffers[closestNote];
     source.connect(this.ctx.destination);
     source.playbackRate.value = playbackRate;
@@ -66,13 +74,5 @@ export class InstrumentService {
       interval++;
     }
     throw new Error('No available buffers for note: ' + midi);
-  }
-
-  public play(key: Key) {
-    this.trigger(key);
-  }
-
-  public playback(event: Event) {
-    this.trigger(event.note, event.startTime);
   }
 }

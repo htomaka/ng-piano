@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
-import { Key } from './models/key';
-import { ReplaySubject } from 'rxjs';
-import { Note } from './models/note';
+import {Injectable} from '@angular/core';
+import {Key} from './models/key';
+import {ReplaySubject} from 'rxjs';
+import {Note} from './models/note';
+import {Event} from './models/event';
 
 @Injectable({
   providedIn: 'root'
@@ -35,6 +36,16 @@ export class KeyboardService {
 
   toArray(): Key[] {
     return Array.from(this.keys.values()).map(val => val);
+  }
+
+  scheduleNoteOn(event: Event) {
+    this.noteOn({note: new Note(event.note), isActive: true});
+  }
+
+  scheduleNoteOff(event: Event) {
+    setTimeout(() => {
+      this.noteOff({note: new Note(event.note), isActive: false});
+    }, event.stopTime - event.startTime);
   }
 
   private trigger(key: Key) {

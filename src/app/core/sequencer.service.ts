@@ -1,5 +1,4 @@
 import {Injectable} from '@angular/core';
-import {AudioContextService} from './audio-context.service';
 import {Event} from './models/event';
 import {Key} from './models/key';
 import {ReplaySubject, Subject} from 'rxjs';
@@ -8,6 +7,8 @@ import {Track} from './models/track';
 import {AppStates} from './models/appStates';
 import {get} from 'lodash';
 import {SequencerCommand, sequencerCommands} from './sequencer-commands';
+import {TransportService} from './transport.service';
+import {ClockService} from './clock/clock.service';
 
 @Injectable({
   providedIn: 'root'
@@ -28,15 +29,12 @@ export class SequencerService {
   public save$ = this.saveSubject.asObservable();
   public state$ = this.stateSubject.asObservable();
 
-  constructor(private audioContextService: AudioContextService) {
+  constructor(public transport: TransportService, private clock: ClockService) {
     this.commands = sequencerCommands(this);
   }
 
   noteOn(key: Key) {
-    const event = new Event(
-      key,
-      this.audioContextService.getCurrentTime() - this.activeTrack.startTime
-    );
+    const event = new Event(key.note.toMidi(), this.clock.getTick());
     this.scheduleNote(event);
   }
 
@@ -47,21 +45,20 @@ export class SequencerService {
   scheduleNote(event: Event) {
     // schedule note on note off event in order to get note duration
     this.stop$.pipe(take(1)).subscribe(() => {
-      event.stopTime =
-        this.audioContextService.getCurrentTime() - this.activeTrack.startTime;
+      event.stopTime = this.clock.getTick();
       this.activeTrack.add(event);
     });
   }
 
   record() {
     this.setState(AppStates.SEQUENCER_RECORDING_ARMED);
-    this.activeTrack = new Track(this.audioContextService.getCurrentTime());
+    this.activeTrack = new Track(this.clock.getTick());
   }
 
-  play(fn: (event: Event) => void) {
+  play() {
     const command = get(this.commands, this.getState());
     if (command && command.play) {
-      command.play(fn);
+      command.play();
     }
   }
 
